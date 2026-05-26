@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RisePay - Master Unified Control Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#F3F4F6] min-h-screen flex text-slate-800">
+
+    <aside class="w-64 bg-slate-950 text-slate-300 flex flex-col justify-between sticky top-0 h-screen border-r border-slate-800 shadow-xl shrink-0 z-40">
+        <div>
+            <div class="px-6 py-6 bg-slate-950/80 flex items-center space-x-3 border-b border-slate-800/60">
+                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-black"><i class="fa-solid fa-bars-progress"></i></div>
+                <div><h2 class="text-sm font-black text-white uppercase tracking-wide">Control Core</h2><span class="text-[10px] text-emerald-400 font-mono">v7.0 Production</span></div>
+            </div>
+
+            <nav class="p-4 space-y-1.5 overflow-y-auto h-[calc(100vh-150px)] hide-scrollbar">
+                <button onclick="switchAdminMenuTab('tab-home')" id="sidebarBtn-tab-home" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold bg-emerald-600 text-white text-left transition-all"><i class="fa-solid fa-house-chimney-window w-5"></i> <span>Home Controls</span></button>
+                <button onclick="switchAdminMenuTab('tab-users')" id="sidebarBtn-tab-users" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-user-gear w-5"></i> <span>Users Engine</span></button>
+                <button onclick="switchAdminMenuTab('tab-deposit-nodes')" id="sidebarBtn-tab-deposit-nodes" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-circle-plus w-5"></i> <span>Deposit Tasks Node</span></button>
+                <button onclick="switchAdminMenuTab('tab-withdrawals')" id="sidebarBtn-tab-withdrawals" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-money-bill-wave w-5"></i> <span>Withdrawal Panel</span></button>
+                <button onclick="switchAdminMenuTab('tab-team-split')" id="sidebarBtn-tab-team-split" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-network-wired w-5"></i> <span>Team Commission</span></button>
+                <button onclick="switchAdminMenuTab('tab-reports')" id="sidebarBtn-tab-reports" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-chart-pie w-5"></i> <span>Ecosystem Reports</span></button>
+                <button onclick="switchAdminMenuTab('tab-master-settings')" id="sidebarBtn-tab-master-settings" class="sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all"><i class="fa-solid fa-sliders w-5"></i> <span>Master Toggles</span></button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-center flex justify-between items-center text-[11px] font-mono">
+            <span class="text-emerald-400"><i class="fa-solid fa-circle text-[9px] animate-pulse"></i> Cloud Connected</span>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="bg-white border-b border-gray-100 py-4 px-8 sticky top-0 z-40 flex justify-between items-center shadow-xs">
+            <h1 id="txtViewHeaderTitle" class="text-lg font-black text-gray-800">Home Controls Workspace</h1>
+        </header>
+
+        <div class="p-6 md:p-8 max-w-5xl w-full mx-auto space-y-6 flex-1 overflow-y-auto hide-scrollbar">
+
+            <section id="viewFrame-tab-home" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6">
+                <div>
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider mb-2">Home Core Multipliers & Brand Headers</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50/60 p-4 rounded-2xl border">
+                        <div class="md:col-span-2 text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Application Branding Main Title Name</label>
+                            <input id="configAppName" type="text" class="w-full px-4 py-2.5 bg-white rounded-xl border font-bold text-sm outline-none">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">1 USDT Price (INR)</label>
+                            <input id="configUsdtRate" type="number" step="0.01" class="w-full px-4 py-2.5 bg-white rounded-xl border font-bold text-sm outline-none">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">USDT Bonus Ratio (%)</label>
+                            <input id="configBonusRatio" type="number" step="0.1" class="w-full px-4 py-2.5 bg-white rounded-xl border font-bold text-sm outline-none">
+                        </div>
+                        <div class="md:col-span-4 text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">INR Task Reward Ratio (%)</label>
+                            <input id="configInrBonus" type="text" class="w-full px-4 py-2.5 bg-white rounded-xl border font-bold text-sm outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <div>
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider mb-1 text-left">Dynamic Homepage Slider Carousel Image Manager</h3>
+                    <p class="text-xs text-gray-400 mb-3 text-left">Apne laptop se photos select karein jo user banner screen par carousel banegi (Base64 data flow).</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="space-y-1.5 text-center">
+                            <span class="text-[10px] font-bold text-gray-400 block uppercase">Slide #1</span>
+                            <input type="file" id="slideFile-0" accept="image/*" onchange="processLocalGallerySlideSelection(0)" class="hidden">
+                            <label for="slideFile-0" class="w-full h-28 bg-gray-50 hover:bg-gray-100 border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative">
+                                <i id="slideIcon-0" class="fa-solid fa-image text-gray-300 text-lg"></i><img id="slideImgPre-0" class="absolute inset-0 w-full h-full object-cover hidden">
+                            </label>
+                        </div>
+                        <div class="space-y-1.5 text-center"><span class="text-[10px] font-bold text-gray-400 block uppercase">Slide #2</span><input type="file" id="slideFile-1" accept="image/*" onchange="processLocalGallerySlideSelection(1)" class="hidden"><label for="slideFile-1" class="w-full h-28 bg-gray-50 hover:bg-gray-100 border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative"><i id="slideIcon-1" class="fa-solid fa-image text-gray-300 text-lg"></i><img id="slideImgPre-1" class="absolute inset-0 w-full h-full object-cover hidden"></label></div>
+                        <div class="space-y-1.5 text-center"><span class="text-[10px] font-bold text-gray-400 block uppercase">Slide #3</span><input type="file" id="slideFile-2" accept="image/*" onchange="processLocalGallerySlideSelection(2)" class="hidden"><label for="slideFile-2" class="w-full h-28 bg-gray-50 hover:bg-gray-100 border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative"><i id="slideIcon-2" class="fa-solid fa-image text-gray-300 text-lg"></i><img id="slideImgPre-2" class="absolute inset-0 w-full h-full object-cover hidden"></label></div>
+                        <div class="space-y-1.5 text-center"><span class="text-[10px] font-bold text-gray-400 block uppercase">Slide #4</span><input type="file" id="slideFile-3" accept="image/*" onchange="processLocalGallerySlideSelection(3)" class="hidden"><label for="slideFile-3" class="w-full h-28 bg-gray-50 hover:bg-gray-100 border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative"><i id="slideIcon-3" class="fa-solid fa-image text-gray-300 text-lg"></i><img id="slideImgPre-3" class="absolute inset-0 w-full h-full object-cover hidden"></label></div>
+                        <div class="space-y-1.5 text-center"><span class="text-[10px] font-bold text-gray-400 block uppercase">Slide #5</span><input type="file" id="slideFile-4" accept="image/*" onchange="processLocalGallerySlideSelection(4)" class="hidden"><label for="slideFile-4" class="w-full h-28 bg-gray-50 hover:bg-gray-100 border border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden relative"><i id="slideIcon-4" class="fa-solid fa-image text-gray-300 text-lg"></i><img id="slideImgPre-4" class="absolute inset-0 w-full h-full object-cover hidden"></label></div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <div>
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider mb-2 text-left"><i class="fa-solid fa-headset text-blue-600"></i> Customer Support Helpdesk Configuration</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Telegram Helpdesk Support Channel URL Link</label>
+                            <input id="cfgSupportTelegram" type="text" class="w-full px-4 py-2.5 rounded-xl border text-xs font-mono font-bold">
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">WhatsApp Customer Service Helpline URL Link</label>
+                            <input id="cfgSupportWhatsapp" type="text" class="w-full px-4 py-2.5 rounded-xl border text-xs font-mono font-bold">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="viewFrame-tab-users" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div>
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider mb-1 text-left">Users Audit Engine Workspace Look-Up</h3>
+                    <div class="flex gap-3 mt-2">
+                        <input id="txtUserEngineSearchQuery" type="text" placeholder="Enter Registered User ID or Mobile Phone Number..." class="flex-1 px-4 py-3 border bg-gray-50/40 font-bold text-sm rounded-xl outline-none">
+                        <button onclick="executeUserEngineMasterLookup()" class="bg-slate-900 text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl border-none cursor-pointer">Query Profile</button>
+                    </div>
+                </div>
+
+                <div id="boxUserEngineResultCard" class="bg-gray-50 border rounded-2xl p-5 space-y-5 text-left hidden">
+                    <div class="flex flex-col md:flex-row justify-between border-b pb-3 gap-2 border-gray-200">
+                        <div>
+                            <h4 id="lblUserEngineId" class="text-base font-black text-gray-900">User ID: -</h4>
+                            <p id="lblUserEnginePhone" class="text-xs text-gray-400 font-mono font-bold mt-0.5">Phone: -</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="toggleAccountRestriction('depositBlocked')" id="btnRestrict-depositBlocked" class="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all"></button>
+                            <button onclick="toggleAccountRestriction('withdrawBlocked')" id="btnRestrict-withdrawBlocked" class="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all"></button>
+                            <button onclick="toggleAccountRestriction('accountBlocked')" id="btnRestrict-accountBlocked" class="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all"></button>
+                            <button onclick="deleteAccountTriggerAction()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-all border-none cursor-pointer"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-bold">
+                        <div class="bg-white p-3 rounded-xl border"><span>Available Balance</span><span id="lblEngineAvailBal" class="text-base font-black text-gray-900 block mt-1">₹0.00</span></div>
+                        <div class="bg-white p-3 rounded-xl border"><span>Total Earned Commission</span><span id="lblEngineTotalDeposit" class="text-base font-black text-gray-800 block mt-1">₹0.00</span></div>
+                        <div class="bg-white p-3 rounded-xl border"><span>Level A Downlines</span><span id="lblEngineTeam1" class="text-base font-black text-emerald-600 block mt-1">0</span></div>
+                        <div class="bg-white p-3 rounded-xl border"><span>Level B Downlines</span><span id="lblEngineTeam2" class="text-base font-black text-blue-600 block mt-1">0</span></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-left">
+                    <span class="text-xs font-black text-gray-400 uppercase block mb-2"><i class="fa-solid fa-dumpster-fire mr-1"></i> Account Soft Deletions Trash Directory</span>
+                    <div id="boxTrashBinContainerGrid" class="space-y-2 max-h-40 overflow-y-auto"></div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 text-left">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-xs font-black text-gray-400 uppercase tracking-wider"><i class="fa-solid fa-users-viewfinder mr-1"></i> Total Users Base Directory</h4>
+                        <button onclick="triggerTotalUserListPdfDownload()" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hover:underline border-none cursor-pointer"><i class="fa-solid fa-file-pdf"></i> Download Users Base PDF</button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-gray-100">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 font-bold border-b uppercase tracking-wide">
+                                    <th class="p-3">User Verification ID</th>
+                                    <th class="p-3">Registered Mobile Number</th>
+                                    <th class="p-3">Referrer Code Handle</th>
+                                    <th class="p-3 text-center">Wallet Actions Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblMasterUsersListBody" class="divide-y text-gray-700 font-medium"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="viewFrame-tab-deposit-nodes" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div class="space-y-4">
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider text-left"><i class="fa-solid fa-square-plus mr-1 text-[#1E56B2]"></i> Create New Task Card Scheme Order Package</h3>
+                    <div class="bg-gray-50 p-4 rounded-xl flex gap-3 items-end border text-left">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Specify Task Amount Value Pool (INR Amount Only)</label>
+                            <input id="txtNewTaskAmount" type="number" placeholder="e.g. 1000" class="w-full px-4 py-2.5 bg-white border rounded-xl font-bold text-sm">
+                        </div>
+                        <button onclick="addNewInrTaskPackage()" class="bg-black text-white text-xs font-black px-6 py-3 rounded-xl transition-all border-none cursor-pointer">Deploy Task</button>
+                    </div>
+                    <div id="inrTaskBoxList" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto"></div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <div class="space-y-4">
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider text-left"><i class="fa-solid fa-receipt mr-1 text-emerald-500"></i> Active Deposits Screenshot Proof Receipts Audit Pipeline</h3>
+                    <div id="boxMasterDepositAuditGridContainer" class="space-y-4 max-h-80 overflow-y-auto pr-2"></div>
+                </div>
+            </section>
+
+            <section id="viewFrame-tab-withdrawals" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div>
+                    <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider mb-1 text-left">Financial Processing Withdrawal Terminal Console Center</h3>
+                    <div class="flex gap-3 mt-3">
+                        <input id="txtWithdrawalLookupQuery" type="text" placeholder="Enter target client registration parameters ID or phone..." class="flex-1 px-4 py-3 border bg-gray-50/40 font-bold text-sm rounded-xl outline-none">
+                        <button onclick="executeWithdrawalTerminalLookup()" class="bg-[#1E56B2] text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl border-none cursor-pointer">Query Ledger</button>
+                    </div>
+                </div>
+
+                <div id="boxWithdrawalTerminalCard" class="bg-gray-50 border rounded-2xl p-5 space-y-5 hidden text-left">
+                    <div class="flex justify-between items-center border-b pb-2"><h4 id="lblWithMetaId" class="text-sm font-black text-gray-800">User: -</h4><span id="lblWithMetaBalance" class="text-sm font-black text-rose-600">Balance Quota: ₹0.00</span></div>
+                    
+                    <div class="p-4 bg-white border rounded-xl space-y-3">
+                        <span class="text-xs font-black text-[#1E56B2] block uppercase"><i class="fa-solid fa-money-bill-transfer"></i> Process Manual Payout Deduction</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="txtWithActionAmount" type="number" placeholder="Enter Payout Value (INR)" class="w-full px-4 py-2.5 border rounded-xl text-xs font-bold outline-none bg-gray-50/50">
+                            <input id="txtWithActionUtr" type="text" placeholder="Enter explicit payout UTR reference number string" class="w-full px-4 py-2.5 border rounded-xl text-xs font-mono font-bold outline-none bg-gray-50/50">
+                        </div>
+                        <button onclick="executeDirectWithdrawalPayoutDebitAction()" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wide px-5 py-3 rounded-xl transition-all border-none cursor-pointer">Settle Withdrawal & Deduct Balance</button>
+                    </div>
+
+                    <div class="p-4 bg-white border rounded-xl space-y-3">
+                        <span class="text-xs font-black text-emerald-600 block uppercase"><i class="fa-solid fa-gift"></i> Reward Incentives or Fine Deductions</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="txtAdjustmentValuePool" type="number" placeholder="Enter adjustment value (₹)" class="w-full px-4 py-2.5 border rounded-xl text-xs font-bold outline-none bg-gray-50/50">
+                            <input id="txtAdjustmentReasonLog" type="text" placeholder="Reason context log statement (e.g. Activity Reward, Manual Correction)" class="w-full px-4 py-2.5 border rounded-xl text-xs font-bold outline-none bg-gray-50/50">
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="processAccountAdjustmentAction('REWARD')" class="flex-1 bg-emerald-600 text-white font-black text-xs uppercase py-3 rounded-xl shadow-xs border-none cursor-pointer">Send Reward</button>
+                            <button onclick="processAccountAdjustmentAction('DEDUCTION')" class="flex-1 bg-amber-600 text-white font-black text-xs uppercase py-3 rounded-xl shadow-xs border-none cursor-pointer">Apply Fine Deduction</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="viewFrame-tab-team-split" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border text-left">
+                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Level A Team Commission Split (%)</label><input id="cfgCommissionLevelAMultiplier" type="number" step="0.1" class="w-full px-4 py-2.5 rounded-xl border bg-white font-black text-xs outline-none"></div>
+                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Level B Team Commission Split (%)</label><input id="cfgCommissionLevelBMultiplier" type="number" step="0.1" class="w-full px-4 py-2.5 rounded-xl border bg-white font-black text-xs outline-none"></div>
+                </div>
+                <div class="pt-2 text-left"><h4 class="text-xs font-black text-gray-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-network-wired"></i> Global Affiliates Downline Referral Trees View Grid</h4><div id="boxTeamHierarchyTreeViewLogs" class="space-y-2 max-h-60 overflow-y-auto"></div></div>
+            </section>
+
+            <section id="viewFrame-tab-reports" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div class="flex flex-wrap gap-3 items-center justify-between border-b pb-3 text-left">
+                    <div>
+                        <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider">Dynamic Financial Statements Analytics</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Separate reporting matrices logs with customized localized statement downloads features tags.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="bg-gray-50 p-5 rounded-2xl border flex flex-col justify-between space-y-3 text-left">
+                        <div><span class="text-xs font-black text-gray-400 uppercase tracking-wider block">All Time Statements</span><div class="mt-2 text-xs font-semibold space-y-1 text-gray-600"><div>Total Users Base: <span id="lblReportAllUsers" class="font-extrabold text-gray-900">0</span></div></div></div>
+                        <button onclick="triggerTotalUserListPdfDownload()" class="w-full bg-slate-900 text-white text-xs font-bold py-2 rounded-xl border-none cursor-pointer"><i class="fa-solid fa-file-pdf"></i> Download Users PDF</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="viewFrame-tab-master-settings" class="admin-view-frame bg-white rounded-3xl shadow-md border p-6 space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="space-y-4 bg-gray-50 p-5 rounded-2xl border">
+                        <span class="text-xs font-black text-gray-400 uppercase block tracking-wider"><i class="fa-solid fa-toggle-on text-blue-600"></i> Global System Restrictions Toggles</span>
+                        <div class="flex justify-between items-center bg-white p-3 border rounded-xl shadow-3xs">
+                            <div><span class="block text-xs font-bold text-gray-800">Under Maintenance Mode Shutdown</span><p class="text-[10px] text-gray-400">Completely closes app and shows under maintenance notification alert window.</p></div>
+                            <label class="relative inline-flex items-center cursor-pointer select-none"><input type="checkbox" id="cfgMaintToggle" class="sr-only peer"><div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-rose-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div></label>
+                        </div>
+                        <div class="flex justify-between items-center bg-white p-3 border rounded-xl shadow-3xs">
+                            <div><span class="block text-xs font-bold text-gray-800">Persistent Dialog Pop-up Notice Alert</span><p class="text-[10px] text-gray-400">Triggers custom join community support notice box overlays upon loop load cycles.</p></div>
+                            <label class="relative inline-flex items-center cursor-pointer select-none"><input type="checkbox" id="cfgPopupAlertToggle" class="sr-only peer"><div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div></label>
+                        </div>
+                    </div>
+                    <div class="space-y-4 bg-gray-50 p-5 rounded-2xl border">
+                        <span class="text-xs font-black text-gray-400 uppercase block tracking-wider"><i class="fa-solid fa-bullhorn text-amber-500"></i> Broadcast Popup Alert Content Payload String</span>
+                        <div><label class="block text-[11px] font-bold text-gray-500 mb-1">Popup Custom Notice Description text message</label><textarea id="cfgPopupAlertText" rows="2" class="w-full px-3 py-2 bg-white border text-xs font-bold rounded-xl outline-none" placeholder="Enter text information or alert content payload string maps..."></textarea></div>
+                        <div><label class="block text-[11px] font-bold text-gray-500 mb-1">Overlay Action Join Redirection Target Telegram Channel Link</label><input id="cfgPopupRedirectionUrl" type="text" class="w-full px-3 py-2 bg-white border font-mono text-xs font-bold rounded-xl outline-none" placeholder="https://t.me/channel"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div id="btnGlobalSaveAnchorBlock" class="pt-2">
+                <button onclick="commitGlobalSettingsBroadcaster()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-xl text-sm tracking-wide transition-all duration-150 cursor-pointer active:scale-[0.99] border-none"><i class="fa-solid fa-cloud-arrow-up"></i> Save & Broadcast Central Settings Data Sync</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Active Project Database Instance Configurations
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let targetedEngineLookupUserNodeDraft = null;
+        let withdrawalTerminalLookupUserNodeDraft = null;
+
+        // Load Global Configurations from Central Storage Node Matrix
+        async function loadCentralSystemSettingsData() {
+            try {
+                const configDocRef = doc(db, "system_settings", "global_config");
+                const configSnap = await getDoc(configDocRef);
+                
+                if (configSnap.exists()) {
+                    const data = configSnap.data();
+                    document.getElementById('configAppName').value = data.appName || 'RisePay';
+                    document.getElementById('configUsdtRate').value = data.usdtRate || '106.08';
+                    document.getElementById('configBonusRatio').value = data.bonusRatio || '2';
+                    document.getElementById('configInrBonus').value = data.inrBonus || '4%';
+                    
+                    document.getElementById('cfgSupportTelegram').value = data.adminSupportTelegramUrl || 'https://t.me/RisePaySupport';
+                    document.getElementById('cfgSupportWhatsapp').value = data.adminSupportWhatsappUrl || 'https://wa.me/919983243312';
+                    
+                    document.getElementById('cfgMaintToggle').checked = data.appMaintenanceActiveState === true;
+                    document.getElementById('cfgPopupAlertToggle').checked = data.appNoticePopupActiveState === true;
+                    document.getElementById('cfgPopupAlertText').value = data.appNoticePopupTextPayload || '';
+                    document.getElementById('cfgPopupRedirectionUrl').value = data.appNoticePopupRedirectLinkUrl || '';
+                    
+                    document.getElementById('cfgCommissionLevelAMultiplier').value = data.commissionLevelA || '5.0';
+                    document.getElementById('cfgCommissionLevelBMultiplier').value = data.commissionLevelB || '2.5';
+
+                    if (data.sliderImages) {
+                        data.sliderImages.forEach((imgBase64, idx) => {
+                            if(imgBase64) {
+                                const imgPre = document.getElementById(`slideImgPre-${idx}`);
+                                const iconPre = document.getElementById(`slideIcon-${idx}`);
+                                if(imgPre && iconPre) { imgPre.src = imgBase64; imgPre.classList.remove('hidden'); iconPre.classList.add('hidden'); }
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error pulling database profiles settings: ", err);
+            }
+        }
+
+        window.commitGlobalSettingsBroadcaster = async function() {
+            try {
+                const configDocRef = doc(db, "system_settings", "global_config");
+                
+                const sliderImagesArray = [];
+                for(let i=0; i<5; i++) {
+                    const imgPre = document.getElementById(`slideImgPre-${i}`);
+                    sliderImagesArray.push(imgPre.classList.contains('hidden') ? "" : imgPre.src);
+                }
+
+                const updatedConfigPayloadData = {
+                    appName: document.getElementById('configAppName').value.trim(),
+                    usdtRate: parseFloat(document.getElementById('configUsdtRate').value) || 106.08,
+                    bonusRatio: parseFloat(document.getElementById('configBonusRatio').value) || 2,
+                    inrBonus: document.getElementById('configInrBonus').value.trim(),
+                    adminSupportTelegramUrl: document.getElementById('cfgSupportTelegram').value.trim(),
+                    adminSupportWhatsappUrl: document.getElementById('cfgSupportWhatsapp').value.trim(),
+                    appMaintenanceActiveState: document.getElementById('cfgMaintToggle').checked,
+                    appNoticePopupActiveState: document.getElementById('cfgPopupAlertToggle').checked,
+                    appNoticePopupTextPayload: document.getElementById('cfgPopupAlertText').value.trim(),
+                    appNoticePopupRedirectLinkUrl: document.getElementById('cfgPopupRedirectionUrl').value.trim(),
+                    commissionLevelA: parseFloat(document.getElementById('cfgCommissionLevelAMultiplier').value) || 5.0,
+                    commissionLevelB: parseFloat(document.getElementById('cfgCommissionLevelBMultiplier').value) || 2.5,
+                    sliderImages: sliderImagesArray
+                };
+
+                await setDoc(configDocRef, updatedConfigPayloadData, { merge: true });
+                alert("Administrative central settings parameters pushed & synchronized successfully!");
+            } catch (err) {
+                alert("Cloud transmission error: " + err.message);
+            }
+        };
+
+        window.processLocalGallerySlideSelection = function(indexId) {
+            const fileInput = document.getElementById(`slideFile-${indexId}`);
+            if(fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64DataStr = e.target.result;
+                    const imgPre = document.getElementById(`slideImgPre-${indexId}`);
+                    const iconPre = document.getElementById(`slideIcon-${indexId}`);
+                    imgPre.src = base64DataStr;
+                    imgPre.classList.remove('hidden');
+                    iconPre.classList.add('hidden');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        };
+
+        // Users Engine Audit Directory Core Modules
+        window.populateMasterTotalUsersTableList = async function() {
+            const tbody = document.getElementById('tblMasterUsersListBody');
+            tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic bg-gray-50/40">Loading database cloud streams...</td></tr>`;
+            
+            try {
+                const querySnap = await getDocs(collection(db, "users"));
+                if(querySnap.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 italic bg-gray-50/40">No registered live users inside datastore.</td></tr>`;
+                    document.getElementById('lblReportAllUsers').innerText = "0";
+                    return;
+                }
+                tbody.innerHTML = '';
+                let totalCounterRowsValue = 0;
+                querySnap.forEach(docNode => {
+                    totalCounterRowsValue++;
+                    const u = docNode.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-gray-100 hover:bg-gray-50/40 text-left";
+                    const depositStatusLabel = u.depositBlocked ? `<span class="bg-rose-50 text-rose-600 rounded px-1.5 py-0.5 text-[10px]">Blocked</span>` : `<span class="bg-emerald-50 text-emerald-600 rounded px-1.5 py-0.5 text-[10px]">Active</span>`;
+                    const withdrawStatusLabel = u.withdrawBlocked ? `<span class="bg-rose-50 text-rose-600 rounded px-1.5 py-0.5 text-[10px]">Blocked</span>` : `<span class="bg-emerald-50 text-emerald-600 rounded px-1.5 py-0.5 text-[10px]">Active</span>`;
+
+                    tr.innerHTML = `<td class="p-3 font-black text-slate-900">${u.userId}</td><td class="p-3 font-mono font-bold text-gray-600">+91 ${u.phone}</td><td class="p-3 font-mono text-indigo-600 font-semibold">${u.referrerCodeId || 'Root Platform Node'}</td><td class="p-3 text-center flex gap-1 justify-center">${depositStatusLabel} ${withdrawStatusLabel}</td>`;
+                    tbody.appendChild(tr);
+                });
+                document.getElementById('lblReportAllUsers').innerText = totalCounterRowsValue;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-rose-500 italic bg-gray-50/40">Failed to sync: ${err.message}</td></tr>`;
+            }
+        };
+
+        window.executeUserEngineMasterLookup = async function() {
+            const queryStr = document.getElementById('txtUserEngineSearchQuery').value.trim(); if(!queryStr) return;
+            try {
+                let snap = await getDocs(query(collection(db, "users"), where("phone", "==", queryStr)));
+                
+                if(snap.empty) {
+                    snap = await getDocs(query(collection(db, "users"), where("userId", "==", queryStr)));
+                }
+
+                if(snap.empty) { alert("User profile handle not found inside active collections database nodes!"); return; }
+                
+                snap.forEach(d => { targetedEngineLookupUserNodeDraft = d.data(); });
+                
+                document.getElementById('lblUserEngineId').innerText = `User ID: ${targetedEngineLookupUserNodeDraft.userId}`;
+                document.getElementById('lblUserEnginePhone').innerText = `Phone: +91 ${targetedEngineLookupUserNodeDraft.phone}`;
+                document.getElementById('lblEngineAvailBal').innerText = `₹${(targetedEngineLookupUserNodeDraft.recharge || 0).toFixed(2)}`;
+                document.getElementById('lblEngineTotalDeposit').innerText = `₹${(targetedEngineLookupUserNodeDraft.commission || 0).toFixed(2)}`;
+                document.getElementById('lblEngineTeam1').innerText = targetedEngineLookupUserNodeDraft.team1Count || 0;
+                document.getElementById('lblEngineTeam2').innerText = targetedEngineLookupUserNodeDraft.team2Count || 0;
+                
+                syncRestrictionButtonsLabelsStyles();
+                document.getElementById('boxUserEngineResultCard').classList.remove('hidden');
+            } catch(e) { alert("Lookup exception: " + e.message); }
+        };
+
+        window.toggleAccountRestriction = async function(propKey) {
+            if(!targetedEngineLookupUserNodeDraft) return;
+            try {
+                const docRef = doc(db, "users", targetedEngineLookupUserNodeDraft.userId);
+                const invertedToggleStateValue = !targetedEngineLookupUserNodeDraft[propKey];
+                
+                await updateDoc(docRef, { [propKey]: invertedToggleStateValue });
+                targetedEngineLookupUserNodeDraft[propKey] = invertedToggleStateValue;
+                
+                syncRestrictionButtonsLabelsStyles();
+                window.populateMasterTotalUsersTableList();
+                alert(`System state mapping restriction updated successfully for key: [${propKey}]`);
+            } catch(err) { alert("Restriction change failed: " + err.message); }
+        };
+
+        window.deleteAccountTriggerAction = async function() {
+            if(!targetedEngineLookupUserNodeDraft) return;
+            if(!confirm(`Archive client profile document [${targetedEngineLookupUserNodeDraft.userId}] onto soft deleted trash collection folder?`)) return;
+            try {
+                const sourceId = targetedEngineLookupUserNodeDraft.userId;
+                targetedEngineLookupUserNodeDraft.deletedTimestamp = new Date().toLocaleString();
+                
+                await setDoc(doc(db, "users_trash", sourceId), targetedEngineLookupUserNodeDraft);
+                await deleteDoc(doc(db, "users", sourceId));
+                
+                document.getElementById('boxUserEngineResultCard').classList.add('hidden');
+                targetedEngineLookupUserNodeDraft = null;
+                
+                window.renderTrashBinLogsGrid();
+                window.populateMasterTotalUsersTableList();
+                alert("Client profile collection record archived to users_trash folder repository.");
+            } catch (err) { alert("Soft deletion script failed: " + err.message); }
+        };
+
+        window.renderTrashBinLogsGrid = async function() {
+            const container = document.getElementById('boxTrashBinContainerGrid');
+            container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-1">Loading archived logs directory...</p>`;
+            try {
+                const snap = await getDocs(collection(db, "users_trash"));
+                if(snap.empty) { container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-1">Trash directory index datasets rows is clean.</p>`; return; }
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const user = d.data();
+                    const row = document.createElement('div'); row.className = "bg-gray-100 p-2.5 rounded-xl flex justify-between items-center text-xs font-bold text-gray-700 shadow-3xs";
+                    row.innerHTML = `<div><span>Archived Member Node ID: ${user.userId}</span></div><button onclick="restoreAccountFromTrashBin('${user.userId}')" class="text-xs font-bold text-emerald-600 bg-white border px-2 py-0.5 rounded shadow-3xs cursor-pointer">Restore Handle</button>`;
+                    container.appendChild(row);
+                });
+            } catch(e) { container.innerHTML = `<p class="text-xs text-rose-500 italic text-center">Failed mapping trash folder.</p>`; }
+        };
+
+        window.restoreAccountFromTrashBin = async function(userId) {
+            try {
+                const trashSnap = await getDoc(doc(db, "users_trash", userId));
+                if(!trashSnap.exists()) return;
+                const userData = trashSnap.data();
+                delete userData.deletedTimestamp;
+
+                await setDoc(doc(db, "users", userId), userData);
+                await deleteDoc(doc(db, "users_trash", userId));
+
+                window.renderTrashBinLogsGrid();
+                window.populateMasterTotalUsersTableList();
+                alert("Account node structure restored back inside primary collection layers successfully!");
+            } catch(err) { alert("Restoration tracking crash: " + err.message); }
+        };
+
+        // Tasks Pool Packages Matrix Subgrids
+        window.renderInrTasksAdminSubgrid = async function() {
+            const box = document.getElementById('inrTaskBoxList');
+            box.innerHTML = `<p class="md:col-span-2 text-xs text-gray-400 italic text-center py-2 bg-gray-50 rounded-xl border w-full">Loading deployed tasks configuration logs data...</p>`;
+            try {
+                const taskSnap = await getDoc(doc(db, "inr_tasks_pool", "active_tasks"));
+                if(taskSnap.exists() && taskSnap.data().inrTasksList) {
+                    const tasksArray = taskSnap.data().inrTasksList;
+                    box.innerHTML = tasksArray.length === 0 ? `<p class="md:col-span-2 text-xs text-gray-400 italic text-center py-2 bg-gray-50 rounded-xl w-full border">No custom tasks deployed yet.</p>` : '';
+                    tasksArray.forEach((amtValue, idx) => {
+                        const row = document.createElement('div');
+                        row.className = "flex justify-between items-center bg-white border p-3.5 rounded-xl text-xs font-bold text-gray-700 shadow-2xs text-left";
+                        row.innerHTML = `<span>Value Plan Pool: <span class="text-black font-extrabold">₹${amtValue}</span></span><button onclick="removeTaskRowItem(${idx})" class="text-rose-500 cursor-pointer bg-transparent border-none"><i class="fa-solid fa-trash-can"></i></button>`;
+                        box.appendChild(row);
+                    });
+                } else {
+                    box.innerHTML = `<p class="md:col-span-2 text-xs text-gray-400 italic text-center py-2 bg-gray-50 rounded-xl w-full border">No custom tasks deployed yet.</p>`;
+                }
+            } catch(e) { box.innerHTML = `<p class="md:col-span-2 text-xs text-rose-500 italic text-center">Plan synchronization drops.</p>`; }
+        };
+
+        window.addNewInrTaskPackage = async function() {
+            const amountVal = document.getElementById('txtNewTaskAmount').value.trim();
+            if(!amountVal || parseFloat(amountVal) <= 0) return;
+            try {
+                const docRef = doc(db, "inr_tasks_pool", "active_tasks");
+                const snap = await getDoc(docRef);
+                let tasksArray = [];
+                if(snap.exists() && snap.data().inrTasksList) {
+                    tasksArray = snap.data().inrTasksList;
+                }
+                tasksArray.push(parseFloat(amountVal));
+                tasksArray.sort((x, y) => x - y);
+
+                await setDoc(docRef, { inrTasksList: tasksArray }, { merge: true });
+                document.getElementById('txtNewTaskAmount').value = '';
+                window.renderInrTasksAdminSubgrid();
+            } catch(err) { alert("Failed expanding task parameters data nodes: " + err.message); }
+        };
+
+        window.removeTaskRowItem = async function(indexId) {
+            try {
+                const docRef = doc(db, "inr_tasks_pool", "active_tasks");
+                const snap = await getDoc(docRef);
+                if(snap.exists() && snap.data().inrTasksList) {
+                    const tasksArray = snap.data().inrTasksList;
+                    tasksArray.splice(indexId, 1);
+                    await setDoc(docRef, { inrTasksList: tasksArray }, { merge: true });
+                    window.renderInrTasksAdminSubgrid();
+                }
+            } catch(e) { alert("Deletion runtime break: " + e.message); }
+        };
+
+        // Receipts Verification Pipeline Logic Block
+        window.renderMasterDepositAuditGridContainer = async function() {
+            const container = document.getElementById('boxMasterDepositAuditGridContainer');
+            container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-10 bg-gray-50 rounded-2xl border">Loading tracking collection screenshots logs lists...</p>`;
+            try {
+                const snap = await getDocs(collection(db, "depositReceiptLogs"));
+                if(snap.empty) { container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-10 bg-gray-50 rounded-2xl border">No customer receipts proofs verification logs.</p>`; return; }
+                container.innerHTML = '';
+                snap.forEach(docNode => {
+                    const log = docNode.data();
+                    const logDocIdStr = docNode.id;
+                    const isPending = log.status === "Pending Verification Audit" || log.status.includes("Pending");
+                    const actionBtnsMarkup = isPending ? `<div class="flex gap-2 w-full md:w-auto"><button onclick="processDepositAuditsApprovalPipelineDecision('${logDocIdStr}', '${log.userUidTargetKey}', ${log.taskAmountValue}, 'APPROVE')" class="flex-1 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg cursor-pointer border-none">Approve</button><button onclick="processDepositAuditsApprovalPipelineDecision('${logDocIdStr}', '${log.userUidTargetKey}', ${log.taskAmountValue}, 'REJECT')" class="flex-1 bg-rose-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg cursor-pointer border-none">Reject</button></div>` : `<span class="text-xs font-mono font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-md">Audited Settle Node</span>`;
+                    
+                    const card = document.createElement('div');
+                    card.className = "bg-white border p-4 rounded-xl flex flex-col md:flex-row gap-4 justify-between items-start md:items-center text-xs text-left shadow-2xs";
+                    card.innerHTML = `<div class="flex gap-3 items-start"><img src="${log.imagePayload}" class="w-16 h-24 object-cover border bg-white p-1 rounded-lg shrink-0"><div><span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-800">${log.status}</span><p class="font-black text-gray-900 mt-1">User ID: ${log.userUidTargetKey}</p><p class="font-mono text-gray-500 text-[11px] mt-0.5"><strong>UTR:</strong> ${log.userInrUtr}</p><p class="font-bold text-slate-700 text-[11px]"><strong>Amount:</strong> ₹${log.taskAmountValue}</p><span class="text-[10px] text-gray-400 font-mono block pt-0.5">${log.timestamp}</span></div></div> ${actionBtnsMarkup}`;
+                    container.appendChild(card);
+                });
+            } catch(e) { container.innerHTML = `<p class="text-xs text-rose-500 italic text-center py-10">Verification logs synchronization down.</p>`; }
+        };
+
+        window.processDepositAuditsApprovalPipelineDecision = async function(logDocId, userUid, amount, choiceCode) {
+            try {
+                const logRef = doc(db, "depositReceiptLogs", logDocId);
+                const userRef = doc(db, "users", userUid);
+
+                if(choiceCode === 'APPROVE') {
+                    const userSnap = await getDoc(userRef);
+                    if(!userSnap.exists()) { alert("Target client user data schema row deleted!"); return; }
+                    
+                    const systemBonusMultiplierValue = parseFloat(document.getElementById('configInrBonus').value.replace('%','')) / 100 || 0.04;
+                    const netAccruedPoolValue = amount * (1 + systemBonusMultiplierValue);
+                    
+                    await updateDoc(userRef, {
+                        recharge: increment(netAccruedPoolValue)
+                    });
+
+                    await updateDoc(logRef, { status: "Approved & Credited" });
+                    await executeAutomatedDownlineTeamCommissionDistribution(userUid, amount);
+                } else {
+                    await updateDoc(logRef, { status: "Rejected & Failed Verification Audit" });
+                }
+                
+                window.renderMasterDepositAuditGridContainer();
+                alert(`Audit action status processed successfully: [${choiceCode}]`);
+            } catch(err) { alert("Transaction approval breakdown pipeline crash: " + err.message); }
+        };
+
+        async function executeAutomatedDownlineTeamCommissionDistribution(clientUid, amount) {
+            try {
+                const userSnap = await getDoc(doc(db, "users", clientUid));
+                if(!userSnap.exists()) return;
+                const userData = userSnap.data();
+                
+                // Tier Level A Direct Referrer Allocation Hub
+                if(userData.referrerCodeId && userData.referrerCodeId !== "admin123") {
+                    const parentId = userData.referrerCodeId;
+                    const multA = parseFloat(document.getElementById('cfgCommissionLevelAMultiplier').value) || 5.0;
+                    const netCommA = amount * (multA / 100);
+                    
+                    const parentDocRef = doc(db, "users", parentId);
+                    const parentSnap = await getDoc(parentDocRef);
+                    if(parentSnap.exists()) {
+                        await updateDoc(parentDocRef, {
+                            recharge: increment(netCommA),
+                            commission: increment(netCommA)
+                        });
+
+                        // Tier Level B Indirect Commission Hub
+                        const parentData = parentSnap.data();
+                        if(parentData.referrerCodeId && parentData.referrerCodeId !== "admin123") {
+                            const higherParentId = parentData.referrerCodeId;
+                            const multB = parseFloat(document.getElementById('cfgCommissionLevelBMultiplier').value) || 2.5;
+                            const netCommB = amount * (multB / 100);
+
+                            const higherParentDocRef = doc(db, "users", higherParentId);
+                            const higherSnap = await getDoc(higherParentDocRef);
+                            if(higherSnap.exists()) {
+                                await updateDoc(higherParentDocRef, {
+                                    recharge: increment(netCommB),
+                                    commission: increment(netCommB)
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (e) { console.error("Error splitting multilevel affiliate commissions variables: ", e); }
+        }
+
+        // Payout Withdrawal Processing Terminal Segments
+        window.executeWithdrawalTerminalLookup = async function() {
+            const queryStr = document.getElementById('txtWithdrawalLookupQuery').value.trim(); if(!queryStr) return;
+            try {
+                let snap = await getDocs(query(collection(db, "users"), where("phone", "==", queryStr)));
+                if(snap.empty) snap = await getDocs(query(collection(db, "users"), where("userId", "==", queryStr)));
+                if(snap.empty) { alert("Customer lookup identity unmatched inside live data pools!"); return; }
+                
+                snap.forEach(d => { withdrawalTerminalLookupUserNodeDraft = d.data(); });
+                
+                document.getElementById('lblWithMetaId').innerText = `Target Profile User ID: ${withdrawalTerminalLookupUserNodeDraft.userId}`;
+                document.getElementById('lblWithMetaBalance').innerText = `Available Balance Quota: ₹${(withdrawalTerminalLookupUserNodeDraft.recharge || 0).toFixed(2)}`;
+                document.getElementById('boxWithdrawalTerminalCard').classList.remove('hidden');
+            } catch(e) { alert("Ledger pull dropout error: " + e.message); }
+        };
+
+        window.executeDirectWithdrawalPayoutDebitAction = async function() {
+            if(!withdrawalTerminalLookupUserNodeDraft) return;
+            const amtVal = document.getElementById('txtWithActionAmount').value.trim();
+            const utrVal = document.getElementById('txtWithActionUtr').value.trim();
+            if(!amtVal || !utrVal) { alert("Please complete input fields strings!"); return; }
+            
+            const numericDeductValue = parseFloat(amtVal);
+            if(withdrawalTerminalLookupUserNodeDraft.recharge < numericDeductValue) { alert("Payout alert: Input debit reduction threshold value is larger than total available wallet quota balance!"); return; }
+            if(!confirm(`Payout Token Reduction: Subtract manual deduction value payout of ₹${amtVal} from balance sheet profile [${withdrawalTerminalLookupUserNodeDraft.userId}]?`)) return;
+
+            try {
+                const userRef = doc(db, "users", withdrawalTerminalLookupUserNodeDraft.userId);
+                await updateDoc(userRef, {
+                    recharge: increment(-numericDeductValue)
+                });
+                alert("Success: Financial debit subtraction committed successfully into cloud layer maps!");
+                document.getElementById('txtWithActionAmount').value = ''; document.getElementById('txtWithActionUtr').value = '';
+                window.executeWithdrawalTerminalLookup();
+            } catch(e) { alert("Payout update error drops: " + e.message); }
+        };
+
+        window.processAccountAdjustmentAction = async function(adjType) {
+            if(!withdrawalTerminalLookupUserNodeDraft) return;
+            const amtVal = document.getElementById('txtAdjustmentValuePool').value.trim();
+            const reasonVal = document.getElementById('txtAdjustmentReasonLog').value.trim() || 'System adjustments configuration manual action';
+            if(!amtVal) { alert("Specify valid numeric input value pools fields!"); return; }
+            
+            const numericAdjustmentTokenValue = parseFloat(amtVal);
+            if(!confirm(`Confirm Account Adjustment: Process layout [${adjType}] structure of ₹${amtVal} onto profile [${withdrawalTerminalLookupUserNodeDraft.userId}]?`)) return;
+
+            try {
+                const userRef = doc(db, "users", withdrawalTerminalLookupUserNodeDraft.userId);
+                const finalTokenIncrementStepFactor = adjType === "REWARD" ? numericAdjustmentTokenValue : -numericAdjustmentTokenValue;
+                
+                await updateDoc(userRef, { recharge: increment(finalTokenIncrementStepFactor) });
+                alert(`Adjustment Complete: Value ledger changed directly inside server index nodes.`);
+                document.getElementById('txtAdjustmentValuePool').value = ''; document.getElementById('txtAdjustmentReasonLog').value = '';
+                window.executeWithdrawalTerminalLookup();
+            } catch(e) { alert("Modification drop: " + e.message); }
+        };
+
+        window.renderTeamHierarchyTreeViewLogs = async function() {
+            const container = document.getElementById('boxTeamHierarchyTreeViewLogs');
+            try {
+                const snap = await getDocs(collection(db, "users"));
+                if(snap.empty) { container.innerHTML = `<p class="text-xs text-gray-400 italic py-1 text-center">Trees matrices structures are clean.</p>`; return; }
+                container.innerHTML = '';
+                snap.forEach(d => {
+                    const u = d.data();
+                    const card = document.createElement('div'); card.className = "bg-gray-50 border p-3 rounded-xl text-xs font-bold flex justify-between items-center text-gray-700 text-left";
+                    card.innerHTML = `<div><span class="text-black font-black">Account User ID Node: ${u.userId} (Phone: ${u.phone})</span><p class="text-[10px] text-gray-400 font-semibold mt-0.5">Parent Referrer Core Identification Tag ID: <span class="text-indigo-600 underline font-mono">${u.referrerCodeId || 'Root Platform Node'}</span></p></div><span class="bg-white px-2 py-0.5 rounded border text-[10px] font-mono shadow-3xs">Level Active</span>`;
+                    container.appendChild(card);
+                });
+            } catch(e) { container.innerHTML = `<p class="text-xs text-rose-500 italic text-center">Trees structure mapping aborted.</p>`; }
+        };
+
+        window.triggerTotalUserListPdfDownload = async function() {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            docPdf.setFont("Helvetica", "bold"); docPdf.text("TOTAL USERS BASE DIRECTORY", 14, 20);
+            docPdf.setFontSize(10); docPdf.setFont("Helvetica", "normal");
+            
+            try {
+                const snap = await getDocs(collection(db, "users"));
+                let verticalPositionCursorY = 44;
+                if(snap.empty) { 
+                    docPdf.text("No active customer profile records found.", 14, verticalPositionCursorY); 
+                } else { 
+                    let counterIndex = 1;
+                    snap.forEach(d => {
+                        const user = d.data();
+                        docPdf.text(`${counterIndex}. UserID: ${user.userId} | Phone: +91 ${user.phone} | Referrer: ${user.referrerCodeId || 'Root Platform'}`, 14, verticalPositionCursorY); 
+                        verticalPositionCursorY += 8; 
+                        counterIndex++;
+                    }); 
+                }
+                docPdf.save(`RisePay_Total_Users_Directory.pdf`);
+            } catch (e) { alert("PDF Compiler Drop: " + e.message); }
+        };
+
+        function syncRestrictionButtonsLabelsStyles() {
+            if(!targetedEngineLookupUserNodeDraft) return; const node = targetedEngineLookupUserNodeDraft;
+            setupBlockStyleBtn('depositBlocked', node.depositBlocked ? "Unblock Deposit" : "Block Deposit", node.depositBlocked);
+            setupBlockStyleBtn('withdrawBlocked', node.withdrawBlocked ? "Unblock Withdraw" : "Block Withdraw", node.withdrawBlocked);
+            setupBlockStyleBtn('accountBlocked', node.accountBlocked ? "Unblock Account" : "Block User Account", node.accountBlocked);
+        }
+
+        function setupBlockStyleBtn(prop, labelText, isActiveFlag) {
+            const btn = document.getElementById(`btnRestrict-${prop}`);
+            if(btn) { btn.innerText = labelText; btn.className = isActiveFlag ? "px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 text-white border border-rose-700 hover:bg-rose-700 transition-all cursor-pointer" : "px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-all cursor-pointer"; }
+        }
+
+        // DOM DomLoad Triggers Pipeline Ignition
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCentralSystemSettingsData();
+            window.populateMasterTotalUsersTableList();
+            window.renderInrTasksAdminSubgrid();
+            window.renderTrashBinLogsGrid();
+            window.renderTeamHierarchyTreeViewLogs();
+        });
+    </script>
+
+    <script>
+        function switchAdminMenuTab(tabId) {
+            document.querySelectorAll('.admin-view-frame').forEach(f => f.classList.add('hidden'));
+            document.getElementById(`viewFrame-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-menu-btn').forEach(b => b.className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all text-left");
+            document.getElementById(`sidebarBtn-${tabId}`).className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold bg-emerald-600 text-white text-left transition-all";
+
+            const titles = {
+                'tab-home': 'Home Controls Workspace', 'tab-users': 'Users Engine Control Directory Console',
+                'tab-deposit-nodes': 'INR Tasks Packages & Deposits Audit Pipelines Review Section',
+                'tab-withdrawals': 'Financial Processing Withdrawal Terminal Console',
+                'tab-team-split': 'Downlines Tiers Multipliers & Commissions Network Matrix',
+                'tab-reports': 'Dynamic Financial Statements Analytics Reports Dashboard',
+                'tab-master-settings': 'Global Overlays Maintenance Toggles Settings Core Hub'
+            };
+            document.getElementById('txtViewHeaderTitle').innerText = titles[tabId] || 'Ecosystem Admin Suite';
+            document.getElementById('btnGlobalSaveAnchorBlock').className = (tabId==='tab-withdrawals' || tabId==='tab-reports' || tabId==='tab-users') ? 'hidden' : 'pt-2';
+
+            if(tabId === 'tab-deposit-nodes') window.renderMasterDepositAuditGridContainer();
+        }
+    </script>
+</body>
+</html>

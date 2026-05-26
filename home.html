@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexapay - Home</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div id="maintenanceOverlayBlock" class="fixed inset-0 bg-slate-900 z-[9999] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center space-y-4 border border-gray-100">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto animate-bounce">
+                <i class="fa-solid fa-hammer"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-900">App is Under Maintenance</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">Our team is currently working for a better update. Please check back after some time. Thank you for your patience!</p>
+            <div class="text-[10px] font-mono text-gray-400 bg-gray-50 py-1.5 rounded-lg border">Status Code: 503 Maintenance Lock</div>
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <div class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
+            <div class="px-5 pt-6 pb-4 bg-white sticky top-0 z-50 flex justify-between items-center">
+                <h1 id="appHeaderName" class="text-2xl font-black text-gray-900 tracking-tight">Nexapay</h1>
+                <div onclick="alert('Notification alert dashboard context: System logs fully cleared.')" class="w-9 h-9 bg-gray-50 text-gray-700 rounded-full border border-gray-100 flex items-center justify-center cursor-pointer relative">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-2 right-2.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                </div>
+            </div>
+
+            <div class="px-4 relative group">
+                <div id="sliderContainer" class="w-full h-44 rounded-2xl overflow-hidden relative bg-black shadow-md">
+                    <div class="slide absolute inset-0 transition-opacity duration-500 opacity-100">
+                        <img src="https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=600" class="w-full h-full object-cover brightness-90">
+                        <div class="absolute bottom-4 left-5 text-white">
+                            <span class="text-xs bg-emerald-500 font-bold px-2.5 py-1 rounded-md">A must read for newbies</span>
+                            <h3 class="text-lg font-bold mt-1">How to make more profits</h3>
+                            <button class="mt-2 text-xs border border-white px-3 py-1 rounded-md font-medium bg-black/20">Click to read</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="sliderDots" class="flex justify-center space-x-1.5 mt-2"></div>
+            </div>
+
+            <div class="px-4 mt-5">
+                <div class="bg-[#F4F6F8] rounded-2xl p-5 flex justify-between items-center border border-gray-50">
+                    <div class="border-r border-gray-200 pr-4 flex-1 text-left">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">USDT Ratio</p>
+                        <h2 class="text-xl font-extrabold text-gray-900 mt-1">1 USDT ≈ <span id="usdtRateDisplay">106.08</span> INR</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Bonus ratio: <span id="bonusRatioDisplay">2</span>%</p>
+                    </div>
+                    <div class="pl-6 w-1/3 text-left">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">INR Bonus Ratio</p>
+                        <h2 id="inrBonusDisplay" class="text-2xl font-black text-gray-900 mt-1">4%</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 mt-4">
+                <button onclick="window.location.href='deposit.html'" class="w-full bg-black hover:bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg relative overflow-hidden transition-all duration-200 active:scale-[0.99] flex justify-center items-center text-lg cursor-pointer">
+                    Top up
+                    <span class="absolute right-0 top-0 bg-gradient-to-l from-indigo-500 to-purple-500 text-[10px] text-white font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-coins text-[9px]"></i> First
+                    </span>
+                </button>
+            </div>
+
+            <div class="px-4 mt-4">
+                <div class="bg-white rounded-2xl border border-gray-100 p-2 grid grid-cols-2 gap-2 shadow-sm">
+                    
+                    <div onclick="window.location.href='me.html'" class="p-4 rounded-xl hover:bg-gray-50/60 border border-transparent hover:border-gray-100 cursor-pointer transition-all flex flex-col justify-between text-left">
+                        <div class="flex justify-between items-center text-gray-400">
+                            <span class="text-xs font-bold text-gray-400">Balance</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 id="lblHomeBalancePool" class="text-lg font-black text-gray-900 mt-1.5">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='token_history.html'" class="p-4 rounded-xl hover:bg-gray-50/60 border border-transparent hover:border-gray-100 cursor-pointer transition-all flex flex-col justify-between text-left">
+                        <div class="flex justify-between items-center text-gray-400">
+                            <span class="text-xs font-bold text-gray-400">Today Received</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 id="lblHomeTodayReceived" class="text-lg font-black text-gray-900 mt-1.5">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='recharge_history.html'" class="p-4 rounded-xl hover:bg-gray-50/60 border border-transparent hover:border-gray-100 cursor-pointer transition-all flex flex-col justify-between text-left">
+                        <div class="flex justify-between items-center text-gray-400">
+                            <span class="text-xs font-bold text-gray-400">Top up Bonus</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 id="lblHomeTopupBonus" class="text-lg font-black text-gray-800 mt-1.5">0.00</h3>
+                    </div>
+
+                    <div onclick="window.location.href='team.html'" class="p-4 rounded-xl hover:bg-gray-50/60 border border-transparent hover:border-gray-100 cursor-pointer transition-all flex flex-col justify-between text-left">
+                        <div class="flex justify-between items-center text-gray-400">
+                            <span class="text-xs font-bold text-gray-400">Team Commission</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                        <h3 id="lblHomeTeamCommission" class="text-lg font-black text-gray-900 mt-1.5">0.00</h3>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="px-4 mt-5">
+                <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm text-left">
+                    <h3 class="text-base font-black text-gray-900">Tutorial</h3>
+                    <div class="mt-4 p-4 rounded-xl bg-gray-50 flex justify-between items-center border border-gray-100">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">How to link to FreeCharge?</h4>
+                        </div>
+                        <div class="w-12 h-8 bg-[#E15A27] rounded-md flex items-center justify-center text-white font-black text-[12px]">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-50">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-[#1E56B2] font-bold transition-all cursor-pointer">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] tracking-wide">Home</span>
+            </button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-right-left text-lg"></i>
+                <span class="text-[10px] tracking-wide">Deposit</span>
+            </button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-briefcase text-lg"></i>
+                <span class="text-[10px] tracking-wide">UPI</span>
+            </button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px] tracking-wide">Team</span>
+            </button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-lg"></i>
+                <span class="text-[10px] tracking-wide">Me</span>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Active Project Database Instance
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentSlideIdx = 0;
+        let sliderInterval;
+
+        // Dynamic Realtime Global Config Pipeline
+        function subscribeToGlobalSystemEcosystem() {
+            const systemConfigDocRef = doc(db, "system_settings", "global_config");
+            
+            onSnapshot(systemConfigDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const settingsData = snapshot.data();
+                    
+                    // Handle Live Maintenance Block
+                    if (settingsData.appMaintenanceActiveState === true) {
+                        document.getElementById('maintenanceOverlayBlock').classList.remove('hidden');
+                        return;
+                    } else {
+                        document.getElementById('maintenanceOverlayBlock').classList.add('hidden');
+                    }
+
+                    // Dynamically map updates to UI components
+                    const appName = settingsData.appName || 'Nexapay';
+                    const usdtRate = settingsData.usdtRate || '106.08';
+                    const bonusRatio = settingsData.bonusRatio || '2';
+                    const inrBonus = settingsData.inrBonus || '4%';
+
+                    document.getElementById('appHeaderName').innerText = appName;
+                    document.getElementById('usdtRateDisplay').innerText = usdtRate;
+                    document.getElementById('bonusRatioDisplay').innerText = bonusRatio;
+                    document.getElementById('inrBonusDisplay').innerText = inrBonus.endsWith('%') ? inrBonus : inrBonus + '%';
+
+                    // Process Slide Photos from Admin panel field array
+                    if (settingsData.sliderImages && Array.isArray(settingsData.sliderImages)) {
+                        initializeGallerySlidersCarousel(settingsData.sliderImages);
+                    } else {
+                        initializeGallerySlidersCarousel([]);
+                    }
+                }
+            }, (error) => {
+                console.error("Firestore Realtime Link Disconnected: ", error);
+            });
+        }
+
+        // Live Active Profile Dashboard Stream
+        function subscribeToUserProfileMetrics() {
+            const activeUserUid = localStorage.getItem('sessionUserIdentityId') || '20014035';
+            
+            // Query match engine targeting active custom identifier code block nodes
+            const userQuery = query(collection(db, "users"), where("userId", "==", activeUserUid));
+            
+            onSnapshot(userQuery, (querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((docNode) => {
+                        const matchedUserNode = docNode.data();
+
+                        const balPoolVal = parseFloat(matchedUserNode.balance || '0.00');
+                        const todayReceivedVal = parseFloat(matchedUserNode.todayReceived || '0.00');
+                        const topupBonusVal = parseFloat(matchedUserNode.topupBonus || '0.00');
+                        const teamCommVal = parseFloat(matchedUserNode.teamCommission || '0.00');
+
+                        // Enforce local dynamic date check rules fallback structures internally
+                        evaluateMidnightResetWithdrawalCache(activeUserUid);
+
+                        // Bind numbers into system elements panels
+                        document.getElementById('lblHomeBalancePool').innerText = balPoolVal.toFixed(2);
+                        document.getElementById('lblHomeTodayReceived').innerText = todayReceivedVal.toFixed(2);
+                        document.getElementById('lblHomeTopupBonus').innerText = topupBonusVal.toFixed(2);
+                        document.getElementById('lblHomeTeamCommission').innerText = teamCommVal.toFixed(2);
+                    });
+                }
+            });
+        }
+
+        function initializeGallerySlidersCarousel(adminUploadedSlides) {
+            const fallbackSlides = [
+                "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=600",
+                "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=600",
+                "https://images.unsplash.com/photo-1642104704074-907c0698cbd9?q=80&w=600"
+            ];
+
+            const validUploadedSlides = adminUploadedSlides.filter(img => img !== null && img !== "");
+            const finalCarouselSlidesList = validUploadedSlides.length > 0 ? validUploadedSlides : fallbackSlides;
+
+            const sliderContainer = document.getElementById('sliderContainer');
+            const sliderDots = document.getElementById('sliderDots');
+            
+            // Clear current layout frame tracking parameters
+            sliderContainer.innerHTML = '';
+            sliderDots.innerHTML = '';
+
+            finalCarouselSlidesList.forEach((imgUrl, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = `slide absolute inset-0 transition-all duration-700 ease-in-out transform ${index === currentSlideIdx ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'}`;
+                slideDiv.innerHTML = `
+                    <img src="${imgUrl}" class="w-full h-full object-cover brightness-[0.85]">
+                    <div class="absolute bottom-4 left-5 text-left text-white">
+                        <span class="text-[10px] bg-white/20 backdrop-blur-md font-bold px-2.5 py-1 rounded-md tracking-wider uppercase">Slide ${index + 1}</span>
+                        <h3 class="text-base font-bold mt-1">Ecosystem Fast Interface Link</h3>
+                    </div>`;
+                sliderContainer.appendChild(slideDiv);
+
+                const dot = document.createElement('button');
+                dot.className = `w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${index === currentSlideIdx ? 'bg-white w-4' : 'bg-gray-400'}`;
+                dot.onclick = () => showSlide(index);
+                sliderDots.appendChild(dot);
+            });
+
+            startAutoSlider();
+        }
+
+        window.showSlide = function(index) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('#sliderDots button');
+            if(!slides.length) return;
+
+            currentSlideIdx = index;
+            slides.forEach((slide, idx) => {
+                if (idx === index) {
+                    slide.classList.remove('opacity-0', 'translate-x-full');
+                    slide.classList.add('opacity-100', 'translate-x-0');
+                    if(dots[idx]) dots[idx].className = "w-4 h-2 rounded-full transition-all duration-300 bg-white cursor-pointer";
+                } else {
+                    slide.classList.remove('opacity-100', 'translate-x-0');
+                    slide.classList.add('opacity-0', 'translate-x-full');
+                    if(dots[idx]) dots[idx].className = "w-2 h-2 rounded-full transition-all duration-300 bg-gray-400 cursor-pointer";
+                }
+            });
+        };
+
+        function startAutoSlider() {
+            clearInterval(sliderInterval);
+            sliderInterval = setInterval(() => {
+                const slides = document.querySelectorAll('.slide');
+                if(slides.length > 0) {
+                    let nextIdx = (currentSlideIdx + 1) % slides.length;
+                    window.showSlide(nextIdx);
+                }
+            }, 3500);
+        }
+
+        function evaluateMidnightResetWithdrawalCache(uid) {
+            const systemCurrentDateKey = new Date().toDateString();
+            const lastLoggedResetDate = localStorage.getItem(`last_reset_date_check_${uid}`);
+
+            if (lastLoggedResetDate !== systemCurrentDateKey) {
+                localStorage.setItem(`last_reset_date_check_${uid}`, systemCurrentDateKey);
+                localStorage.setItem(`user_today_withdraw_received_total_${uid}`, '0.00');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            subscribeToGlobalSystemEcosystem();
+            subscribeToUserProfileMetrics();
+        });
+    </script>
+</body>
+</html>

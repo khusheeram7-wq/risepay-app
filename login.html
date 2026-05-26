@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RisePay - Log In</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Input fields se spin directional controls hatane ke liye */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white flex justify-center items-center min-h-screen">
+
+    <div id="maintenanceOverlayBlock" class="fixed inset-0 bg-slate-900 z-[9999] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center space-y-4 border border-gray-100">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto animate-bounce">
+                <i class="fa-solid fa-hammer"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-900">App is Under Maintenance</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">Our team is currently working for a better update. Please check back after some time. Thank you for your patience!</p>
+            <div class="text-[10px] font-mono text-gray-400 bg-gray-50 py-1.5 rounded-lg border">Status Code: 503 Maintenance Lock</div>
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between relative px-6">
+        
+        <div class="flex-1 flex flex-col justify-start">
+            <div class="w-full py-6 border-b border-gray-100 text-center mb-16">
+                <h2 id="lblLoginBrandName" class="text-lg font-bold text-black tracking-wide uppercase">LOGIN</h2>
+            </div>
+
+            <div class="space-y-6 relative">
+                
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                    <input type="number" id="txtLoginPhoneQuery" oninput="validateLoginFormState()" placeholder="Enter 10 digit phone number" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                    <div class="absolute -bottom-5 left-4 text-rose-500 text-[11px] font-bold hidden" id="phone-error">Invalid phone number or password</div>
+                </div>
+
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="txtLoginPassword" oninput="validateLoginFormState()" placeholder="Enter Password" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                    <div class="absolute -bottom-5 left-4 text-rose-500 text-[11px] font-bold hidden" id="pass-error">Incorrect Password</div>
+                </div>
+
+                <div class="flex justify-center w-full pt-4">
+                    <div id="photoToastAlertBox" class="hidden w-full max-w-[340px] bg-[#4A4A4A] text-white text-center text-[13px] font-normal py-3 px-5 rounded-xl shadow-lg transition-all duration-150 leading-snug mx-auto">
+                        <span id="photoToastTextContent">Invalid phone number or pass <br> word</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-24">
+                <button onclick="handleUserEngineLoginVerification()" id="btnLoginSubmit" type="button" disabled
+                    class="w-full bg-[#888888] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-not-allowed active:scale-[0.99]">
+                    LOG IN
+                </button>
+            </div>
+
+            <div class="text-center mt-6 text-sm text-[#666666]">
+                Don't have an account? <a href="register.html" class="text-black font-bold no-underline hover:underline ml-1">Register Now</a>
+            </div>
+        </div>
+
+        <div class="py-5 bg-white text-center text-[10px] font-mono text-gray-300">Secure Database Tunnel Sync</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Active Project Database Instance
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let activeLockoutInterval = null;
+
+        function triggerPhotoStyleToast(messageText) {
+            const toastContainer = document.getElementById('photoToastAlertBox');
+            const toastText = document.getElementById('photoToastTextContent');
+            toastText.innerHTML = messageText;
+            toastContainer.classList.remove('hidden');
+        }
+
+        function clearPhotoStyleToast() {
+            document.getElementById('photoToastAlertBox').classList.add('hidden');
+        }
+
+        function checkActiveLockoutTimerState() {
+            const currentPhoneInput = document.getElementById('txtLoginPhoneQuery').value.trim();
+            if(!currentPhoneInput || currentPhoneInput.length !== 10) {
+                if (activeLockoutInterval) clearInterval(activeLockoutInterval);
+                clearPhotoStyleToast();
+                return false;
+            }
+
+            const lockTimestamp = localStorage.getItem(`lockout_time_${currentPhoneInput}`);
+            if (!lockTimestamp) {
+                if (activeLockoutInterval) clearInterval(activeLockoutInterval);
+                // Purane system ki wajah se clear na ho jaye isliye yahan check lagaya hai
+                return false;
+            }
+
+            const baseRemainingSeconds = Math.ceil((parseInt(lockTimestamp) - Date.now()) / 1000);
+
+            if (baseRemainingSeconds <= 0) {
+                localStorage.removeItem(`lockout_time_${currentPhoneInput}`);
+                localStorage.removeItem(`failed_attempts_${currentPhoneInput}`);
+                if (activeLockoutInterval) clearInterval(activeLockoutInterval);
+                clearPhotoStyleToast();
+                return false;
+            }
+
+            const btn = document.getElementById('btnLoginSubmit');
+            btn.disabled = true;
+            btn.className = "w-full bg-[#888888] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-not-allowed";
+
+            if (activeLockoutInterval) clearInterval(activeLockoutInterval);
+            
+            const updateTimerDisplay = () => {
+                const currentRemaining = Math.ceil((parseInt(lockTimestamp) - Date.now()) / 1000);
+                if (currentRemaining <= 0) {
+                    clearInterval(activeLockoutInterval);
+                    localStorage.removeItem(`lockout_time_${currentPhoneInput}`);
+                    localStorage.removeItem(`failed_attempts_${currentPhoneInput}`);
+                    clearPhotoStyleToast();
+                    window.validateLoginFormState();
+                } else {
+                    const minutesPart = Math.floor(currentRemaining / 60).toString().padStart(2, '0');
+                    const secondsPart = (currentRemaining % 60).toString().padStart(2, '0');
+                    triggerPhotoStyleToast(`Too many failed attempts, Please <br> wait ${minutesPart}:${secondsPart} before trying a <br> gain`);
+                }
+            };
+
+            updateTimerDisplay();
+            activeLockoutInterval = setInterval(updateTimerDisplay, 1000);
+            return true;
+        }
+
+        window.checkGlobalEcosystemStatesOnLoad = async function() {
+            try {
+                const systemConfigDocRef = doc(db, "system_settings", "global_config");
+                const configSnap = await getDoc(systemConfigDocRef);
+                
+                if (configSnap.exists()) {
+                    const settingsData = configSnap.data();
+                    if (settingsData.appMaintenanceActiveState === true) {
+                        document.getElementById('maintenanceOverlayBlock').classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error("Firebase Connection Error: ", error);
+            }
+        };
+
+        window.validateLoginFormState = function() {
+            const phoneField = document.getElementById('txtLoginPhoneQuery');
+            
+            if (phoneField.value.length > 10) {
+                phoneField.value = phoneField.value.slice(0, 10);
+            }
+
+            if (checkActiveLockoutTimerState()) {
+                return; 
+            }
+
+            const passVal = document.getElementById('txtLoginPassword').value.trim();
+            const btn = document.getElementById('btnLoginSubmit');
+
+            if (phoneField.value.length === 10 && passVal.length >= 6) {
+                btn.className = "w-full bg-[#000000] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-pointer active:scale-[0.99]";
+                btn.disabled = false;
+                btn.innerText = "LOG IN";
+            } else {
+                btn.className = "w-full bg-[#888888] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-not-allowed";
+                btn.disabled = true;
+                btn.innerText = "LOG IN";
+            }
+
+            document.getElementById('phone-error').classList.add('hidden');
+            document.getElementById('pass-error').classList.add('hidden');
+            // Hata diya clear taaki input badalne par active toasts screen par bane rahein jab tak timer/verification invoke na ho
+        };
+
+        window.handleUserEngineLoginVerification = async function() {
+            const phoneVal = document.getElementById('txtLoginPhoneQuery').value.trim();
+            
+            if (localStorage.getItem(`lockout_time_${phoneVal}`)) {
+                checkActiveLockoutTimerState();
+                return;
+            }
+
+            const passVal = document.getElementById('txtLoginPassword').value.trim();
+            const btn = document.getElementById('btnLoginSubmit');
+
+            // Action color trigger: Instantly changes to premium light blue color grid
+            btn.className = "w-full bg-[#1E56B2] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-wait";
+            btn.innerText = "LOG IN";
+            btn.disabled = true;
+
+            try {
+                let matchedUserNode = null;
+                
+                let userQueryRef = query(collection(db, "users"), where("phone", "==", phoneVal));
+                let querySnap = await getDocs(userQueryRef);
+
+                if (querySnap.empty) {
+                    userQueryRef = query(collection(db, "users"), where("userId", "==", phoneVal));
+                    querySnap = await getDocs(userQueryRef);
+                }
+
+                if (!querySnap.empty) {
+                    querySnap.forEach(docNode => {
+                        matchedUserNode = docNode.data();
+                    });
+                } else {
+                    // UNREGISTERED TOAST ALERT
+                    document.getElementById('phone-error').classList.remove('hidden');
+                    triggerPhotoStyleToast("Invalid phone number or pass <br> word");
+                    window.validateLoginFormState();
+                    return;
+                }
+
+                if (matchedUserNode.accountBlocked === true) {
+                    alert("ACCESS DENIED: Your account is blocked by Admin!");
+                    window.validateLoginFormState();
+                    return;
+                }
+
+                if (passVal !== matchedUserNode.password) {
+                    document.getElementById('pass-error').classList.remove('hidden');
+                    
+                    let currentFailedAttempts = parseInt(localStorage.getItem(`failed_attempts_${phoneVal}`) || '0');
+                    currentFailedAttempts++;
+                    localStorage.setItem(`failed_attempts_${phoneVal}`, currentFailedAttempts.toString());
+
+                    if (currentFailedAttempts >= 3) {
+                        // 5-minute precise user lockout countdown matrix initialization
+                        const blockExpiryTimeValue = Date.now() + (5 * 60 * 1000); 
+                        localStorage.setItem(`lockout_time_${phoneVal}`, blockExpiryTimeValue.toString());
+                        checkActiveLockoutTimerState();
+                    } else {
+                        const attemptsLeft = 3 - currentFailedAttempts;
+                        triggerPhotoStyleToast(`Incorrect password. You have <br> ${attemptsLeft} more attempt before a 5-mi <br> nute lockout`);
+                        
+                        // Yahan button aur visual state maintain rakhi hai taaki button instant refresh hoke toggle na kare aur toast dikhta rahe
+                        btn.className = "w-full bg-[#000000] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-200 cursor-pointer";
+                        btn.disabled = false;
+                        btn.innerText = "LOG IN";
+                    }
+                    return;
+                }
+
+                // SUCCESS LIFECYCLE MEMORY RE-INITIALIZATION
+                localStorage.removeItem(`failed_attempts_${phoneVal}`);
+                localStorage.removeItem(`lockout_time_${phoneVal}`);
+
+                localStorage.setItem('sessionUserIdentityId', matchedUserNode.userId);
+                localStorage.setItem('userRegisteredPhoneString', matchedUserNode.phone);
+
+                // Seamless Instant Relocation Redirection Link
+                window.location.href = 'home.html';
+
+            } catch (error) {
+                console.error("Cloud Database Runtime Drop: ", error);
+                alert("Database Synchronization dropped. Please check server network configurations!");
+                window.validateLoginFormState();
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', window.checkGlobalEcosystemStatesOnLoad);
+    </script>
+</body>
+</html>

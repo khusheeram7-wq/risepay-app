@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenguinPay - Me Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pin-box:focus { border-color: #1E56B2; outline: none; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <div id="subView-mainProfile" class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
+            
+            <div class="px-5 pt-8 pb-5 text-left bg-white">
+                <div onclick="openProfileSubView('viewFrame-accountInfo')" class="flex items-center space-x-2 cursor-pointer select-none">
+                    <span data-translate="edit_profile" class="text-lg font-black text-gray-900">Edit profile</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-500 pt-0.5"></i>
+                </div>
+                <div class="text-xs text-gray-400 font-bold mt-1">ID: <span id="lblUserProfileId">20012569</span></div>
+
+                <div class="mt-5 flex justify-between items-center bg-white border border-gray-100/70 p-5 rounded-2xl shadow-2xs">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-chart-pie text-[#1E56B2]"></i> Quota
+                        </span>
+                        <div class="flex items-baseline"><span id="lblUserQuotaBalance" class="text-3xl font-black text-gray-900">0</span><span class="text-xs font-black ml-1 text-gray-800">INR</span></div>
+                        <p class="text-[10px] font-bold text-gray-400">Reward ratio <span id="lblUserRewardRatio">2%</span></p>
+                    </div>
+                    <button onclick="window.location.href='deposit.html'" data-translate="top_up" class="bg-black hover:bg-gray-900 text-white text-xs font-black px-6 py-3 rounded-xl shadow-md transition-all cursor-pointer">Top up</button>
+                </div>
+
+                <div class="mt-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4 rounded-xl relative overflow-hidden flex items-center justify-between border border-slate-950">
+                    <div class="space-y-0.5 z-10">
+                        <h4 class="text-sm font-black tracking-tight">Invite user <span class="text-amber-400">rewards</span></h4>
+                        <p class="text-[10px] font-medium text-slate-400">Earn team commissions program</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-xl text-amber-400 z-10"><i class="fa-solid fa-gift"></i></div>
+                </div>
+            </div>
+
+            <div class="px-4 space-y-2">
+                <div onclick="window.location.href='recharge_history.html'" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-clock-rotate-left w-5 text-gray-400 text-sm"></i> <span data-translate="recharge_history">Recharge History</span></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+                <div onclick="window.location.href='token_history.html'" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-file-invoice-dollar w-5 text-gray-400 text-sm"></i> <span data-translate="token_history">Token History</span></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+                <div onclick="toggleLanguageConfiguration()" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs select-none">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-globe w-5 text-gray-400 text-sm"></i> <span data-translate="languages">Languages</span></div>
+                    <span id="lblCurrentLanguagePill" class="text-xs font-bold text-gray-400">English </span>
+                </div>
+                <div onclick="openContactSupportOverlay()" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-headset w-5 text-gray-400 text-sm"></i> <span data-translate="contact_us">Contact Us</span></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+                <div onclick="triggerClientLogoutAction()" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-rose-50/30 transition-colors shadow-3xs group">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-600 group-hover:text-rose-600"><i class="fa-solid fa-arrow-right-from-bracket w-5 text-gray-400 group-hover:text-rose-400 text-sm"></i> <span data-translate="sign_out">Sign Out</span></div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewFrame-accountInfo" class="flex-1 overflow-y-auto pb-24 hide-scrollbar hidden bg-white">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center sticky top-0 bg-white z-50">
+                <button onclick="closeProfileSubView('viewFrame-accountInfo')" class="text-gray-700 mr-4 text-base"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 data-translate="account_info" class="text-base font-black text-gray-800 flex-1 text-center pr-6">Account Info</h2>
+            </div>
+            <div class="p-6 flex flex-col items-center space-y-6">
+                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 border border-gray-100 shadow-2xs"><i class="fa-solid fa-user text-4xl"></i></div>
+                <div class="w-full space-y-3">
+                    <div class="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100/60"><span class="text-xs font-bold text-gray-400 uppercase">ID</span><span id="lblInfoMetaId" class="text-xs font-bold text-gray-700">20012569</span></div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100/60"><span class="text-xs font-bold text-gray-400 uppercase">Phone</span><span id="lblInfoMetaPhone" class="text-xs font-mono font-bold text-gray-700">9983243312</span></div>
+                    <div onclick="openProfileSubView('viewFrame-changePassword')" class="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100/60 cursor-pointer hover:bg-gray-100/70 transition-all"><span data-translate="password" class="text-xs font-bold text-gray-700">Password</span><div class="flex items-center space-x-1.5 text-xs text-gray-400 font-mono"><span>******</span><i class="fa-solid fa-chevron-right text-[10px]"></i></div></div>
+                    <div onclick="openProfileSubView('viewFrame-changePin')" class="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100/60 cursor-pointer hover:bg-gray-100/70 transition-all"><span class="text-xs font-bold text-gray-700 uppercase">PIN</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewFrame-changePassword" class="flex-1 overflow-y-auto pb-24 hide-scrollbar hidden bg-white">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center sticky top-0 bg-white z-50">
+                <button onclick="closeProfileSubView('viewFrame-changePassword')" class="text-gray-700 mr-4 text-base"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 data-translate="change_password" class="text-base font-black text-gray-800 flex-1 text-center pr-6">Change Password</h2>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="password" id="txtOldPassword" placeholder="Old Password" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-semibold outline-none focus:border-black transition-all">
+                <input type="password" id="txtNewPassword" placeholder="New Password" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-semibold outline-none focus:border-black transition-all">
+                <input type="password" id="txtConfirmPassword" placeholder="Confirm" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-semibold outline-none focus:border-black transition-all">
+                <div class="pt-8">
+                    <button onclick="submitChangePasswordForm()" data-translate="submit" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-md cursor-pointer text-sm uppercase tracking-wide">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewFrame-changePin" class="flex-1 overflow-y-auto pb-24 hide-scrollbar hidden bg-white">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center sticky top-0 bg-white z-50">
+                <button onclick="closeProfileSubView('viewFrame-changePin')" class="text-gray-700 mr-4 text-base"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6 uppercase">PIN</h2>
+            </div>
+            <div class="p-6 space-y-5 text-left">
+                
+                <div>
+                    <label class="block text-xs font-black text-gray-700 uppercase tracking-wide mb-2">Old PIN</label>
+                    <div class="flex space-x-2 justify-between"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-700 uppercase tracking-wide mb-2 mt-2">New PIN</label>
+                    <div class="flex space-x-2 justify-between"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-700 uppercase tracking-wide mb-2 mt-2">Confirm</label>
+                    <div class="flex space-x-2 justify-between"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"></div>
+                </div>
+
+                <div class="pt-6">
+                    <button onclick="submitChangePinSecureData()" data-translate="submit" class="w-full bg-[#808080] text-white font-bold py-3.5 rounded-xl shadow-md text-xs uppercase tracking-wider cursor-pointer">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalSupportChannels" class="absolute inset-0 bg-black/40 z-50 flex flex-col justify-end hidden select-none transition-all">
+            <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl space-y-6 animate-slide-up">
+                
+                <div class="grid grid-cols-2 gap-4 text-center py-4">
+                    <div onclick="triggerSupportRedirect('telegram')" class="p-5 border border-gray-100 rounded-2xl bg-gray-50/60 hover:bg-blue-50/30 cursor-pointer flex flex-col items-center space-y-2 transition-all">
+                        <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl shadow-xs"><i class="fa-brands fa-telegram"></i></div>
+                        <span class="text-xs font-black text-gray-700">Telegram</span>
+                    </div>
+                    <div onclick="triggerSupportRedirect('whatsapp')" class="p-5 border border-gray-100 rounded-2xl bg-gray-50/60 hover:bg-emerald-50/30 cursor-pointer flex flex-col items-center space-y-2 transition-all">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl shadow-xs"><i class="fa-brands fa-whatsapp"></i></div>
+                        <span class="text-xs font-black text-gray-700">WhatsApp</span>
+                    </div>
+                </div>
+
+                <button onclick="closeContactSupportOverlay()" class="w-full bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl text-xs uppercase cursor-pointer">Close</button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span>
+            </button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span>
+            </button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span>
+            </button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span>
+            </button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-[#1E56B2] font-bold transition-all cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Language dictionaries translation block strings keys mapping data arrays
+        const langPack = {
+            en: { edit_profile: "Edit profile", top_up: "Top up", recharge_history: "Recharge History", token_history: "Token History", languages: "Languages", contact_us: "Contact Us", sign_out: "Sign Out", account_info: "Account Info", change_password: "Change Password", submit: "Submit", password: "Password" },
+            hi: { edit_profile: "प्रोफ़ाइल संपादित करें", top_up: "टॉप अप करें", recharge_history: "रिचार्ज का इतिहास", token_history: "टोकन का इतिहास", languages: "भाषा बदलें", contact_us: "हमसे संपर्क करें", sign_out: "लॉग आउट करें", account_info: "खाते की जानकारी", change_password: "पासवर्ड बदलें", submit: "जमा करें", password: "पासवर्ड" }
+        };
+
+        let activeLanguageMode = localStorage.getItem('appLangMode') || 'en';
+
+        function initializeMeWorkspace() {
+            // Setup dynamic wallet balances logs properties variables sets
+            const activeUserUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
+            const userPhone = localStorage.getItem('userRegisteredPhoneString') || '9983243312';
+            const liveBalance = parseFloat(localStorage.getItem(`user_bal_pool_${activeUserUid}`) || '51.82');
+            const globalBonusRatio = localStorage.getItem('bonusRatio') || '2';
+
+            document.getElementById('lblUserProfileId').innerText = activeUserUid;
+            document.getElementById('lblInfoMetaId').innerText = activeUserUid;
+            document.getElementById('lblInfoMetaPhone').innerText = userPhone;
+            document.getElementById('lblUserQuotaBalance').innerText = liveBalance.toFixed(2);
+            document.getElementById('lblUserRewardRatio').innerText = globalBonusRatio.endsWith('%') ? globalBonusRatio : globalBonusRatio + '%';
+
+            // Automatic incremental focus chain loop triggers inside PIN boxes components fields
+            setupPinInputsAutofocusChain();
+            applyLanguageTranslations();
+        }
+
+        function openProfileSubView(frameId) {
+            document.getElementById('subView-mainProfile').classList.add('hidden');
+            document.getElementById(frameId).classList.remove('hidden');
+        }
+
+        function closeProfileSubView(frameId) {
+            document.getElementById(frameId).classList.add('hidden');
+            document.getElementById('subView-mainProfile').classList.remove('hidden');
+        }
+
+        function toggleLanguageConfiguration() {
+            activeLanguageMode = (activeLanguageMode === 'en') ? 'hi' : 'en';
+            localStorage.setItem('appLangMode', activeLanguageMode);
+            applyLanguageTranslations();
+        }
+
+        function applyLanguageTranslations() {
+            const dict = langPack[activeLanguageMode];
+            document.getElementById('lblCurrentLanguagePill').innerText = activeLanguageMode === 'en' ? 'English' : 'हिंदी';
+            
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if(dict[key]) el.innerText = dict[key];
+            });
+        }
+
+        function openContactSupportOverlay() {
+            document.getElementById('modalSupportChannels').classList.remove('hidden');
+        }
+
+        function closeContactSupportOverlay() {
+            document.getElementById('modalSupportChannels').classList.add('hidden');
+        }
+
+        function triggerSupportRedirect(channel) {
+            // Extract external URLs variables saved inside Master Admin Panel Control center datasets fields array
+            const telegramUrl = localStorage.getItem('adminSupportTelegramUrl') || 'https://t.me/PenguinPaySupport';
+            const whatsappUrl = localStorage.getItem('adminSupportWhatsappUrl') || 'https://wa.me/919983243312';
+
+            const targetDestinationLink = (channel === 'telegram') ? telegramUrl : whatsappUrl;
+            window.open(targetDestinationLink, '_blank');
+        }
+
+        function setupPinInputsAutofocusChain() {
+            document.querySelectorAll('.pin-box').forEach((box, idx, arr) => {
+                box.oninput = () => {
+                    if(box.value.length === 1 && arr[idx + 1]) arr[idx + 1].focus();
+                };
+                box.onkeydown = (e) => {
+                    if(e.key === 'Backspace' && box.value.length === 0 && arr[idx - 1]) arr[idx - 1].focus();
+                };
+            });
+        }
+
+        function submitChangePasswordForm() {
+            const oldP = document.getElementById('txtOldPassword').value.trim();
+            const newP = document.getElementById('txtNewPassword').value.trim();
+            if(!oldP || !newP) { alert("Please complete password input fields!"); return; }
+            alert("Success: Account password structure modified successfully!");
+            closeProfileSubView('viewFrame-changePassword');
+        }
+
+        function submitChangePinSecureData() {
+            alert("Success: Secure Authorization Security PIN registered successfully!");
+            closeProfileSubView('viewFrame-changePin');
+        }
+
+        function triggerClientLogoutAction() {
+            if(confirm("Are you sure you want to log out from this session profile string terminal?")) {
+                window.location.href = 'register.html';
+            }
+        }
+
+        window.onload = initializeMeWorkspace;
+    </script>
+</body>
+</html>

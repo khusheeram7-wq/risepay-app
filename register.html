@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Remove input spin arrows configuration controls fields */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-white flex justify-center items-center min-h-screen">
+
+    <div id="maintenanceOverlayBlock" class="fixed inset-0 bg-slate-900 z-[9999] flex justify-center items-center px-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center space-y-4 border border-gray-100">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-2xl mx-auto animate-bounce">
+                <i class="fa-solid fa-hammer"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-900">App is Under Maintenance</h2>
+            <p class="text-xs text-gray-500 leading-relaxed">Our team is currently working for a better update. Please check back after some time. Thank you for your patience!</p>
+            <div class="text-[10px] font-mono text-gray-400 bg-gray-50 py-1.5 rounded-lg border">Status Code: 503 Maintenance Lock</div>
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between px-6 relative">
+        
+        <div class="flex-1 flex flex-col justify-start">
+            <div class="w-full py-6 border-b border-gray-100 text-center mb-16">
+                <h2 class="text-lg font-bold text-black tracking-wide uppercase">Register</h2>
+            </div>
+
+            <div class="space-y-6">
+                
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                    <input type="number" id="inputRegPhone" oninput="validateRegisterFormFieldsState()" placeholder="Phone" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                </div>
+
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="inputRegPassword" oninput="validateRegisterFormFieldsState()" placeholder="Enter Password" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                </div>
+
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" id="inputRegRepeatPassword" oninput="validateRegisterFormFieldsState()" placeholder="Repeat Password" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                </div>
+
+                <div class="relative flex items-center bg-[#F9F9F9] rounded-xl border border-[#F0F0F0] focus-within:border-gray-300 transition-all duration-200">
+                    <span class="absolute left-5 text-gray-400 text-lg opacity-40">
+                        <i class="fa-solid fa-envelope"></i>
+                    </span>
+                    <input type="text" id="inputRegReferralCode" oninput="validateRegisterFormFieldsState()" placeholder="Referral Code (Required)" 
+                        class="w-full pl-14 pr-5 py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none font-medium text-[16px]">
+                </div>
+            </div>
+
+            <div class="mt-20">
+                <button onclick="executeUserRegistrationEngineSubmit()" id="btnRegisterSubmit" type="button" disabled
+                    class="w-full bg-[#888888] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-150 cursor-not-allowed active:scale-[0.98]">
+                    Register
+                </button>
+            </div>
+
+            <div class="text-center mt-6 text-sm text-[#666666]">
+                Already registered inside system pool? <a href="login.html" class="text-black font-bold no-underline hover:underline ml-1">Login Here</a>
+            </div>
+        </div>
+
+        <div class="py-5 bg-white text-center text-[10px] font-mono text-gray-300 border-t border-gray-50">Secure Database Tunnel Sync</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // Main Configuration keys matching your latest cloud database environment
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.checkApplicationSystemGlobalStates = async function() {
+            try {
+                const systemConfigDocRef = doc(db, "system_settings", "global_config");
+                const configSnap = await getDoc(systemConfigDocRef);
+                
+                if (configSnap.exists()) {
+                    const settingsData = configSnap.data();
+                    if (settingsData.appMaintenanceActiveState === true) {
+                        document.getElementById('maintenanceOverlayBlock').classList.remove('hidden');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error("Firebase Connection Warning: ", error);
+            }
+
+            const urlParamsString = window.location.search;
+            const urlObj = new URLSearchParams(urlParamsString);
+            const referralCodeParam = urlObj.get('code');
+            const refInputField = document.getElementById('inputRegReferralCode');
+
+            if(referralCodeParam && referralCodeParam.trim() !== "") {
+                refInputField.value = referralCodeParam.trim();
+                refInputField.readOnly = true;
+                refInputField.className = "w-full pl-14 pr-5 py-4 bg-gray-100 rounded-xl text-[#1E56B2] font-black text-[16px] outline-none border-none cursor-not-allowed";
+            } else {
+                // strict rule setup: fields remains empty by default, forcing real referral inputs or admin123 code overrides
+                refInputField.value = ''; 
+            }
+            window.validateRegisterFormFieldsState();
+        };
+
+        window.validateRegisterFormFieldsState = function() {
+            const phoneField = document.getElementById('inputRegPhone');
+            const passVal = document.getElementById('inputRegPassword').value.trim();
+            const repeatVal = document.getElementById('inputRegRepeatPassword').value.trim();
+            const refVal = document.getElementById('inputRegReferralCode').value.trim();
+            const btn = document.getElementById('btnRegisterSubmit');
+
+            if (phoneField.value.length > 10) {
+                phoneField.value = phoneField.value.slice(0, 10);
+            }
+
+            // STRIKT VALIDATION BARRIER: referral code input string must be filled to trigger access submission
+            if(phoneField.value.length === 10 && passVal.length >= 6 && repeatVal.length >= 6 && refVal.length >= 4) {
+                btn.className = "w-full bg-black text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-150 cursor-pointer active:scale-[0.98] shadow-md";
+                btn.disabled = false;
+            } else {
+                btn.className = "w-full bg-[#888888] text-white font-bold py-4 rounded-xl text-base border-none tracking-wider transition-all duration-150 cursor-not-allowed";
+                btn.disabled = true;
+            }
+        };
+
+        window.executeUserRegistrationEngineSubmit = async function() {
+            const phone = document.getElementById('inputRegPhone').value.trim();
+            const pass = document.getElementById('inputRegPassword').value.trim();
+            const repeatPass = document.getElementById('inputRegRepeatPassword').value.trim();
+            const refCode = document.getElementById('inputRegReferralCode').value.trim();
+            const btn = document.getElementById('btnRegisterSubmit');
+
+            if(phone.length !== 10) { alert("Please input exact 10 digit phone number!"); return; }
+            if(pass !== repeatPass) { alert("Passwords do not match!"); return; }
+            if(!refCode) { alert("Access Blocked: Valid Invite Referral code is strictly required to proceed registration!"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Validating Referrer Nodes...";
+
+            try {
+                // Cross-verify duplicate profile parameters strings inside cloud collection layers
+                const userQueryRef = query(collection(db, "users"), where("phone", "==", phone));
+                const querySnap = await getDocs(userQueryRef);
+
+                if(!querySnap.empty) {
+                    alert("Restricted: Specified phone number is already registered inside cloud database!");
+                    btn.disabled = false; btn.innerText = "Register";
+                    window.validateRegisterFormFieldsState();
+                    return;
+                }
+
+                // Node Verification: If not admin123 master key override code string, query parent profile existences
+                let parentUserRecordData = null;
+                if(refCode !== "admin123") {
+                    const parentDocRef = doc(db, "users", refCode);
+                    const parentSnap = await getDoc(parentDocRef);
+                    if(!parentSnap.exists()) {
+                        alert("Invalid Invite Code: Provided referral id does not match any valid user row matrix inside database! Use code 'admin123' if direct registration is intended.");
+                        btn.disabled = false; btn.innerText = "Register";
+                        window.validateRegisterFormFieldsState();
+                        return;
+                    }
+                    parentUserRecordData = parentSnap.data();
+                }
+
+                btn.innerText = "Processing Cloud Sync...";
+
+                // Generate sequence unique random 8-digit client Identification ID strings parameters checking duplicates
+                let autoGeneratedId = Math.floor(Math.floor(Math.random() * 9000) + 20010000).toString();
+                let docIdRef = doc(db, "users", autoGeneratedId);
+                let idCheckSnap = await getDoc(docIdRef);
+
+                while(idCheckSnap.exists()) {
+                    autoGeneratedId = Math.floor(Math.floor(Math.random() * 9000) + 20010000).toString();
+                    docIdRef = doc(db, "users", autoGeneratedId);
+                    idCheckSnap = await getDoc(docIdRef);
+                }
+
+                // Construct dynamic multilevel system entity structural schema object parameters
+                const newUserRecordData = {
+                    userId: autoGeneratedId,
+                    phone: phone,
+                    password: pass, 
+                    recharge: 0, 
+                    commission: 0, 
+                    team1Count: 0, // Level A Direct downlines count tracker logs metrics
+                    team2Count: 0, // Level B Indirect downlines chain tracker logs metrics
+                    referrerCodeId: refCode, 
+                    depositBlocked: false, 
+                    withdrawBlocked: false, 
+                    accountBlocked: false,
+                    registrationDate: new Date().toLocaleString()
+                };
+
+                await setDoc(doc(db, "users", autoGeneratedId), newUserRecordData);
+
+                // DYNAMIC MULTI LEVEL TEAM MATRIX ALLOCATION PIPELINE (Level 1 and Level 2)
+                if(refCode !== "admin123") {
+                    // Update immediate direct parent node: Level 1 Team count increment
+                    const directParentDocRef = doc(db, "users", refCode);
+                    await updateDoc(directParentDocRef, {
+                        team1Count: increment(1)
+                    });
+
+                    // Lookup higher branch node: If direct parent also has a legitimate referrer ID, increment Level 2 Team count
+                    if(parentUserRecordData && parentUserRecordData.referrerCodeId && parentUserRecordData.referrerCodeId !== "admin123") {
+                        const higherIndirectParentDocRef = doc(db, "users", parentUserRecordData.referrerCodeId);
+                        const higherSnap = await getDoc(higherIndirectParentDocRef);
+                        if(higherSnap.exists()) {
+                            await updateDoc(higherIndirectParentDocRef, {
+                                team2Count: increment(1)
+                            });
+                        }
+                    }
+                }
+
+                // Increment master global admin analytics telemetry indicators counters rows logs variables 
+                const globalCountersRef = doc(db, "system_settings", "telemetry_counters");
+                await setDoc(globalCountersRef, {
+                    teamTotalCountValue: increment(1),
+                    teamTodayJoinCount: increment(1)
+                }, { merge: true });
+
+                // Success Context Route Pipeline: seamless immediate relocation command directly loading login sheet views framework
+                window.location.href = 'login.html';
+
+            } catch (error) {
+                console.error("Cloud Connection Sync Failed: ", error);
+                alert("Database Sync Failed: Connection dropped. Please verify configurations rule channels!");
+                btn.disabled = false; btn.innerText = "Register";
+                window.validateRegisterFormFieldsState();
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', window.checkApplicationSystemGlobalStates);
+    </script>
+</body>
+</html>

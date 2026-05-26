@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RisePay - Deposit</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link class="ui-theme-track" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div id="modalTaskReminderPopupWall" class="fixed inset-0 bg-black/50 z-[9999] flex flex-col justify-center items-center px-4 hidden select-none animate-fade-in">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-5 text-center shadow-2xl border border-gray-100">
+            <div class="space-y-1">
+                <h3 class="text-base font-black text-gray-900 tracking-tight">Task Reminders</h3>
+                <p class="text-xs text-gray-500 leading-relaxed">You have an assignment under processing or pending verification check status. Please handle it promptly to continue trading cycles.</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button id="btnPopupCancelTimerLock" disabled onclick="dismissTaskReminderPopupOverlay()" class="flex-1 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl text-xs uppercase tracking-wide cursor-not-allowed transition-colors">Cancel (5s)</button>
+                <button onclick="jumpToActiveInPaymentRechargeLedger()" class="flex-1 bg-[#1E56B2] text-white font-black py-3 rounded-xl text-xs uppercase tracking-wide shadow-md transition-all">Jump</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <div class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
+            
+            <div class="px-5 pt-6 bg-white sticky top-0 z-40 border-b border-gray-100 pb-2">
+                <div class="flex space-x-6 text-base font-black text-gray-400">
+                    <button onclick="switchCategoryGateTab('inr')" id="tabBtn-inr" class="text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer">INR</button>
+                    <button onclick="switchCategoryGateTab('usdt')" id="tabBtn-usdt" class="pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer">USDT</button>
+                </div>
+            </div>
+
+            <div id="section-inr" class="px-4 mt-4 space-y-4">
+                <div class="flex space-x-6 text-sm font-bold text-gray-400 border-b border-gray-400 pb-2">
+                    <button onclick="switchInrSubCategoryTab('Task')" id="subTabBtn-Task" class="text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer">Task</button>
+                    <button onclick="switchInrSubCategoryTab('VIP')" id="subTabBtn-VIP" class="pb-1 border-b-2 border-transparent cursor-pointer">VIP</button>
+                </div>
+
+                <div class="bg-[#EEF2FF] rounded-xl p-3 flex items-center space-x-2.5 border border-indigo-50">
+                    <span class="text-amber-500 text-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i></span>
+                    <p class="text-[11px] font-bold text-gray-700">Complete a task to earn Commission and Bonus</p>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 mt-2">
+                    <div onclick="toggleSortDirectionCriteriaValue()" class="relative bg-gray-100 px-3 py-2 rounded-lg text-xs font-bold text-gray-600 flex items-center gap-1 cursor-pointer select-none">
+                        <span id="lblCurrentSortDirectionText">From low to high</span> 
+                        <i class="fa-solid fa-arrow-up-9-1 text-[10px] text-gray-400"></i>
+                    </div>
+                    <div class="flex space-x-1">
+                        <input id="txtFilterMinRange" type="number" oninput="triggerTaskFilterProcessing()" placeholder="Min" class="w-14 bg-gray-100 text-center py-2 rounded-lg text-xs font-bold outline-none placeholder-gray-400">
+                        <span class="text-gray-300 text-xs self-center">-</span>
+                        <input id="txtFilterMaxRange" type="number" oninput="triggerTaskFilterProcessing()" placeholder="Max" class="w-14 bg-gray-100 text-center py-2 rounded-lg text-xs font-bold outline-none placeholder-gray-400">
+                    </div>
+                    <button onclick="resetAndRefreshTaskGridConsole()" class="bg-black text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-gray-900 transition-colors cursor-pointer">Refresh</button>
+                </div>
+
+                <div id="inrTasksContainer" class="space-y-1.5 pt-2"></div>
+            </div>
+
+            <div id="section-usdt" class="px-4 mt-5 space-y-5 hidden">
+                <div class="bg-white rounded-2xl p-5 flex flex-col items-center text-center border border-gray-50 shadow-2xs">
+                    <div class="w-44 h-44 border border-gray-100 p-3 rounded-xl bg-white flex justify-center items-center">
+                        <img id="usdtQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TGLHkVDuDpSSzbbtsbbyrgCaf8org5gX2H" class="w-full h-full object-contain">
+                    </div>
+                    <div class="w-full mt-5 bg-white border border-gray-100 rounded-xl p-4 flex justify-between items-center shadow-3xs">
+                        <div class="truncate text-left pr-2">
+                            <span class="block text-[10px] font-bold text-gray-400">Wallet Address (TRC-20)</span>
+                            <p id="usdtAddressTxt" class="text-xs font-mono font-black truncate text-gray-800">TGLHkVDuDpSSzbbtsbbyrgCaf8org5gX2H</p>
+                        </div>
+                        <button onclick="copyAddressTextString()" class="bg-gray-50 text-gray-700 p-2.5 rounded-xl border text-xs shrink-0 cursor-pointer"><i class="fa-solid fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-1 space-y-3">
+                    <div class="flex justify-between items-center px-1 text-xs font-bold">
+                        <span>Calculator</span> <span>1 USDT = <span id="calcRateSpan">106.08</span> INR</span>
+                    </div>
+                    <input id="inputUsdtAmount" oninput="calculateCryptoConversion()" type="number" placeholder="Please enter the input amount" class="w-full px-4 py-4 rounded-xl border border-gray-300 text-sm font-medium outline-none focus:border-black shadow-2xs">
+                    <div class="space-y-1 text-xs font-bold text-gray-800 px-1">
+                        <div class="flex justify-between"><span>Estimated bonus:</span><span><span id="calcBonusUsdt">0</span> (<span id="calcBonusPercent">2</span>%) INR</span></div>
+                        <div class="flex justify-between text-sm font-black"><span>Total:</span><span><span id="calcTotalInr">0</span> INR</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalSelectUpi" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end hidden transition-all">
+            <div class="bg-white w-full rounded-t-3xl p-6 space-y-5 shadow-2xl animate-slide-up">
+                <div class="text-center font-black text-gray-800 text-base">Select Send UPI</div>
+                
+                <div id="boxDynamicSendUpiRadioOptionAnchor" class="space-y-2"></div>
+
+                <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-left">
+                    <span class="text-xs font-black text-amber-800 block mb-1">Important Notice:</span>
+                    <p class="text-[11px] font-semibold text-amber-700 leading-normal">Please select an <span class="font-bold text-red-600">appropriate amount</span> for fast payment. Multiple payment failures will result in restrictions.</p>
+                </div>
+                <button onclick="closeModalWindow('modalSelectUpi')" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold text-xs uppercase cursor-pointer">Cancel</button>
+            </div>
+        </div>
+
+        <div id="modalTaskDetail" class="absolute inset-0 bg-white z-50 flex flex-col justify-between hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center bg-white sticky top-0 z-50">
+                <button onclick="closeModalWindow('modalTaskDetail')" class="text-gray-700 mr-4 text-base cursor-pointer"><i class="fa-solid fa-chevron-left"></i></button>
+                <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6">Task Detail</h2>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-5 hide-scrollbar bg-white">
+                <div class="bg-rose-50 text-rose-600 font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 border border-rose-100 shadow-3xs">
+                    <i class="fa-regular fa-clock text-sm animate-spin-slow"></i> 
+                    <span class="tracking-wide">Time Left: <span id="lblCountdownTimerClock" class="font-mono font-black text-sm">05:00</span></span>
+                </div>
+
+                <div class="flex justify-between items-center text-xs font-semibold py-1 border-b border-gray-50">
+                    <span class="text-gray-400">Payment Channel</span><span id="lblMetaPaymentChannel" class="font-bold text-gray-800 font-mono">-</span>
+                </div>
+
+                <div class="text-xs font-black text-[#1E56B2] uppercase tracking-wider pt-2 flex items-center gap-1"><i class="fa-solid fa-bank"></i> Bank Accounts Target Receiver</div>
+                <div class="space-y-3 bg-gray-50/60 p-4 rounded-2xl border border-gray-100">
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Bank Card Number</span><div class="flex items-center space-x-2"><span id="lblBankCard" class="font-mono font-black text-[#1E56B2]">-</span><button onclick="copyText('lblBankCard')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Bank Name</span><div class="flex items-center space-x-2"><span id="lblBankName" class="font-bold text-gray-800">-</span><button onclick="copyText('lblBankName')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">IFSC Code</span><div class="flex items-center space-x-2"><span id="lblBankIfsc" class="font-mono font-black text-gray-800">-</span><button onclick="copyText('lblBankIfsc')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Payee Name</span><div class="flex items-center space-x-2"><span id="lblBankPayee" class="font-bold text-gray-800">-</span><button onclick="copyText('lblBankPayee')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                    <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">Money Amount</span><div class="flex items-center space-x-2"><span id="lblBankMoney" class="font-black text-red-600 text-sm">0 RS</span><button onclick="copyText('lblBankMoney')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                </div>
+
+                <div class="flex justify-between items-center text-xs"><span class="text-gray-400 font-bold">System Remark Tag Code</span><div class="flex items-center space-x-2"><span id="lblBankRemark" class="font-mono font-bold text-gray-700">-</span><button onclick="copyText('lblBankRemark')" class="text-gray-400"><i class="fa-regular fa-copy"></i></button></div></div>
+                <hr class="border-gray-100">
+
+                <div class="space-y-4 pt-1">
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-1.5">Enter Transaction UTR (UPI Ref. ID)</label>
+                        <input id="txtUserInrUtr" type="text" placeholder="12 Digit Transaction UTR numeric number string" class="w-full px-4 py-3.5 rounded-xl border border-gray-300 font-mono font-bold text-sm bg-white outline-none focus:border-[#1E56B2]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-gray-600 mb-2">Upload Proof of Payment Screenshot</label>
+                        <input type="file" id="fieldInrScreenshotField" accept="image/*" onchange="previewInrScreenshotBlobSelection()" class="hidden">
+                        <label for="fieldInrScreenshotField" class="w-32 h-32 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden">
+                            <div id="boxImgPreviewPlaceholder" class="text-center text-gray-400 flex flex-col items-center"><i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-[10px] font-bold">Upload Pic</span></div>
+                            <img id="imgInrPreviewElement" class="absolute inset-0 w-full h-full object-cover hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-gray-100 flex space-x-3 sticky bottom-0">
+                <button onclick="executeCancelOrderAction()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-md">Cancel Order</button>
+                <button onclick="submitInrOrderToAdmin()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-md">Submit Details</button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span></button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-[#1E56B2] font-bold transition-all cursor-pointer"><i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span></button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span></button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span></button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer"><i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span></button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State managers matching global functional components window logic mapping 
+        window.currentScopeGateTab = 'inr';
+        window.currentInrSubTabClass = 'Task'; 
+        window.currentFilterSortDirectionDirection = 'LOW-TO-HIGH';
+        window.activeScopeSessionUserIdentityUid = localStorage.getItem('sessionUserIdentityId') || '20014035';
+
+        window.globalUsdtRate = 106.08;
+        window.globalBonusRatio = 2;
+        window.globalInrBonus = '4%';
+
+        window.currentActiveCountdownTimerObjectRef = null;
+        window.selectedTaskAmountValuePool = 0;
+        window.selectedUserUpiStringEndpointDraft = '';
+        window.temporaryScreenshotBase64Payload = '';
+        window.isPopupOverlayDismissedForThisInstanceRunLoop = false;
+        
+        let firebaseFetchedTasksList = [];
+
+        // Realtime Global Variables Database Config Sync Pipeline Listener Loop
+        function initGlobalSystemEcosystemStreams() {
+            onSnapshot(doc(db, "system_settings", "global_config"), (snapshot) => {
+                if(snapshot.exists()){
+                    const data = snapshot.data();
+                    window.globalUsdtRate = parseFloat(data.usdtRate || '106.08');
+                    window.globalBonusRatio = parseFloat(data.bonusRatio || '2');
+                    window.globalInrBonus = (data.inrBonus || '4%').toString();
+
+                    document.getElementById('calcRateSpan').innerText = window.globalUsdtRate;
+                    document.getElementById('calcBonusPercent').innerText = window.globalBonusRatio;
+                    
+                    if(data.usdtWalletAddressTRC20) {
+                        document.getElementById('usdtAddressTxt').innerText = data.usdtWalletAddressTRC20;
+                        document.getElementById('usdtQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${data.usdtWalletAddressTRC20}`;
+                    }
+                    window.renderInrTasks();
+                }
+            });
+
+            // Live Realtime Task Generator Stream mapping admin actions
+            onSnapshot(collection(db, "deposit_tasks"), (snapshot) => {
+                firebaseFetchedTasksList = [];
+                snapshot.forEach(docNode => {
+                    firebaseFetchedTasksList.push({ id: docNode.id, ...docNode.data() });
+                });
+                window.renderInrTasks();
+            });
+        }
+
+        window.switchCategoryGateTab = function(categoryType) {
+            window.currentScopeGateTab = categoryType;
+            const btnInr = document.getElementById('tabBtn-inr');
+            const btnUsdt = document.getElementById('tabBtn-usdt');
+            const secInr = document.getElementById('section-inr');
+            const secUsdt = document.getElementById('section-usdt');
+
+            if(categoryType === 'inr') {
+                secInr.classList.remove('hidden'); secUsdt.classList.add('hidden');
+                btnInr.className = "text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer";
+                btnUsdt.className = "pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer";
+            } else {
+                secInr.classList.add('hidden'); secUsdt.classList.remove('hidden');
+                btnInr.className = "pb-2 border-b-2 border-transparent font-bold text-gray-400 cursor-pointer";
+                btnUsdt.className = "text-gray-900 border-b-2 border-black pb-2 font-black cursor-pointer";
+            }
+        };
+
+        window.switchInrSubCategoryTab = function(subClassName) {
+            window.currentInrSubTabClass = subClassName;
+            document.getElementById('subTabBtn-Task').className = subClassName === 'Task' ? "text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer" : "pb-1 border-b-2 border-transparent cursor-pointer";
+            document.getElementById('subTabBtn-VIP').className = subClassName === 'VIP' ? "text-gray-900 border-b-2 border-black pb-1 font-black cursor-pointer" : "pb-1 border-b-2 border-transparent cursor-pointer";
+            window.renderInrTasks();
+        };
+
+        window.toggleSortDirectionCriteriaValue = function() {
+            window.currentFilterSortDirectionDirection = (window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') ? 'HIGH-TO-LOW' : 'LOW-TO-HIGH';
+            document.getElementById('lblCurrentSortDirectionText').innerText = (window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') ? 'From low to high' : 'From high to low';
+            window.renderInrTasks();
+        };
+
+        window.triggerTaskFilterProcessing = function() { window.renderInrTasks(); };
+        window.resetAndRefreshTaskGridConsole = function() { document.getElementById('txtFilterMinRange').value = ''; document.getElementById('txtFilterMaxRange').value = ''; window.renderInrTasks(); };
+
+        window.renderInrTasks = function() {
+            const container = document.getElementById('inrTasksContainer');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const minVal = parseFloat(document.getElementById('txtFilterMinRange').value) || 0;
+            const maxVal = parseFloat(document.getElementById('txtFilterMaxRange').value) || Infinity;
+
+            // Tasks Fallback array layer if remote database collection cluster nodes scale turns null
+            const backupTasksList = [
+                { amount: 200 }, { amount: 500 }, { amount: 1200 }, { amount: 8000 },
+                { amount: 15000 }, { amount: 25000 }, { amount: 50000 }
+            ];
+
+            let activeProcessingSource = firebaseFetchedTasksList.length > 0 ? firebaseFetchedTasksList : backupTasksList;
+
+            const lockoutDbKey = `user_lockout_penalty_timestamp_logs_${window.activeScopeSessionUserIdentityUid}`;
+            const lockoutRegistry = JSON.parse(localStorage.getItem(lockoutDbKey)) || {};
+            const currentTimeMillis = Date.now();
+
+            let visibleFilteredTasksList = activeProcessingSource.filter(task => {
+                const amountKeyString = task.amount.toString();
+                if (lockoutRegistry[amountKeyString]) {
+                    const blockExpiryTimestamp = parseFloat(lockoutRegistry[amountKeyString]);
+                    if (currentTimeMillis < blockExpiryTimestamp) {
+                        return false; 
+                    } else {
+                        delete lockoutRegistry[amountKeyString];
+                        localStorage.setItem(lockoutDbKey, JSON.stringify(lockoutRegistry));
+                    }
+                }
+                return true;
+            });
+
+            if(window.currentInrSubTabClass === 'Task') {
+                visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount <= 10000);
+            } else {
+                visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount > 10000);
+            }
+
+            visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount >= minVal && task.amount <= maxVal);
+
+            if(window.currentFilterSortDirectionDirection === 'LOW-TO-HIGH') {
+                visibleFilteredTasksList.sort((a,b) => a.amount - b.amount);
+            } else {
+                visibleFilteredTasksList.sort((a,b) => b.amount - a.amount);
+            }
+
+            if(visibleFilteredTasksList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6 italic bg-gray-50 border rounded-2xl">No task cards found under this filter scope.</p>`;
+                return;
+            }
+
+            visibleFilteredTasksList.forEach(task => {
+                const numericAmt = parseFloat(task.amount);
+                const computedIncome = (numericAmt * (parseFloat(window.globalInrBonus)/100)).toFixed(2);
+                const computedQuota = (numericAmt + parseFloat(computedIncome)).toFixed(2);
+
+                const cardNodeRow = document.createElement('div');
+                cardNodeRow.className = "bg-white p-3.5 flex justify-between items-center border-b border-gray-100 text-left";
+                cardNodeRow.innerHTML = `
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${numericAmt.toFixed(0)} INR</h3>
+                        <div class="flex space-x-6 text-xs mt-1 text-gray-400 font-semibold tracking-wide">
+                            <div>Income<span class="block text-gray-800 font-black mt-0.5">${parseFloat(computedIncome)} <span class="text-gray-400 font-normal text-[10px]">(${parseFloat(window.globalInrBonus)}%)</span></span></div>
+                            <div>Quota<span class="block text-[#0ea5e9] font-black mt-0.5">+${parseFloat(computedQuota)}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="handleTaskBuyActionTrigger(${numericAmt})" class="bg-black text-white text-xs font-black px-6 py-2.5 rounded-lg hover:bg-gray-900 shadow-xs cursor-pointer transition-colors">Buy</button>
+                `;
+                container.appendChild(cardNodeRow);
+            });
+        };
+
+        window.handleTaskBuyActionTrigger = async function(amount) {
+            try {
+                // Keval log-in user ki verified send channel UPI list live update target mapping
+                const upiQueryRef = query(collection(db, "user_upi_accounts"), 
+                    where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid),
+                    where("scopeChannel", "==", "send"),
+                    where("isSaleActive", "==", true)
+                );
+                
+                const upiSnapshot = await getDocs(upiQueryRef);
+                const activeUserSendUpiProfiles = [];
+                upiSnapshot.forEach(docNode => {
+                    activeUserSendUpiProfiles.push(docNode.data());
+                });
+
+                if(activeUserSendUpiProfiles.length === 0) {
+                    alert("Attention Required: Please bind your explicit UPI inside 'Send Payment' segment on UPI page before attempting task orders!");
+                    window.location.href = 'upi.html';
+                    return;
+                }
+
+                window.selectedTaskAmountValuePool = amount;
+                const optionBoxContainer = document.getElementById('boxDynamicSendUpiRadioOptionAnchor');
+                optionBoxContainer.innerHTML = '';
+
+                activeUserSendUpiProfiles.forEach((account) => {
+                    const labelRowNode = document.createElement('div');
+                    labelRowNode.setAttribute("onclick", `executeDirectUpiSelectionRowTrigger('${account.vpaAddress}')`);
+                    labelRowNode.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50 bg-white shadow-2xs transition-all active:scale-[0.99]";
+                    labelRowNode.innerHTML = `
+                        <div class="flex items-center space-x-3 text-left">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1E56B2] text-xs font-black flex items-center justify-center uppercase font-mono">${account.providerName ? account.providerName.substring(0,2) : 'UP'}</div>
+                            <div><span class="text-sm font-black text-gray-800 font-mono block">${account.vpaAddress}</span></div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
+                    optionBoxContainer.appendChild(labelRowNode);
+                });
+                document.getElementById('modalSelectUpi').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Error building live client context channel profiles mapping: ", err);
+            }
+        };
+
+        window.executeDirectUpiSelectionRowTrigger = function(vpaAddressString) {
+            window.selectedUserUpiStringEndpointDraft = vpaAddressString;
+            window.proceedToTaskBankDetailsPage();
+        };
+
+        window.proceedToTaskBankDetailsPage = async function() {
+            window.closeModalWindow('modalSelectUpi');
+
+            // Load Admin Target Receiver Account Configurations from live Cloud Document
+            try {
+                const bankSnap = await getDoc(doc(db, "system_settings", "bank_config"));
+                if(bankSnap.exists()) {
+                    const bankData = bankSnap.data();
+                    document.getElementById('lblBankCard').innerText = bankData.adminBankCardNumber || '0772101017541';
+                    document.getElementById('lblBankName').innerText = bankData.adminBankNameTitle || 'Canara Bank';
+                    document.getElementById('lblBankIfsc').innerText = bankData.adminBankIfscCode || 'CNRB0000772';
+                    document.getElementById('lblBankPayee').innerText = bankData.adminBankPayeeLabel || 'Almas';
+                    document.getElementById('lblBankRemark').innerText = bankData.adminBankRemarkCode || 'SP1eashqv76d';
+                }
+            } catch (err) {
+                console.error("Failed fetching live bank configuration channels mapping matrix: ", err);
+            }
+
+            document.getElementById('lblMetaPaymentChannel').innerText = window.selectedUserUpiStringEndpointDraft;
+            document.getElementById('lblBankMoney').innerText = window.selectedTaskAmountValuePool + " RS";
+
+            document.getElementById('txtUserInrUtr').value = '';
+            document.getElementById('fieldInrScreenshotField').value = '';
+            document.getElementById('imgInrPreviewElement').classList.add('hidden');
+            document.getElementById('boxImgPreviewPlaceholder').classList.remove('hidden');
+            window.temporaryScreenshotBase64Payload = '';
+
+            window.initializeFiveMinutesCountdownClockTimer();
+            document.getElementById('modalTaskDetail').classList.remove('hidden');
+        };
+
+        window.initializeFiveMinutesCountdownClockTimer = function() {
+            clearInterval(window.currentActiveCountdownTimerObjectRef);
+            let timeRemainingSecondsValue = 5 * 60; 
+
+            const lblClock = document.getElementById('lblCountdownTimerClock');
+            window.currentActiveCountdownTimerObjectRef = setInterval(() => {
+                let minutesPart = Math.floor(timeRemainingSecondsValue / 60);
+                let secondsPart = timeRemainingSecondsValue % 60;
+                minutesPart = minutesPart < 10 ? '0' + minutesPart : minutesPart;
+                secondsPart = secondsPart < 10 ? '0' + secondsPart : secondsPart;
+
+                lblClock.innerText = `${minutesPart}:${secondsPart}`;
+
+                if(timeRemainingSecondsValue <= 0) {
+                    clearInterval(window.currentActiveCountdownTimerObjectRef);
+                    window.processOrderExecutionOutcomeStateTerminus('TIMEOUT');
+                }
+                timeRemainingSecondsValue--;
+            }, 1000);
+        };
+
+        window.executeCancelOrderAction = function() {
+            if(!confirm("Are you sure you want to cancel this order task package layout structure?")) return;
+            window.processOrderExecutionOutcomeStateTerminus('CANCEL');
+        };
+
+        window.submitInrOrderToAdmin = async function() {
+            const utrStringVal = document.getElementById('txtUserInrUtr').value.trim();
+            if(utrStringVal.length < 12 || isNaN(utrStringVal)) { alert("Please input complete valid 12 digit reference number UTR code details!"); return; }
+            if(!window.temporaryScreenshotBase64Payload) { alert("Please snap or upload the transaction payment screenshot receipt file proof!"); return; }
+            
+            // Trigger dynamic saving loop
+            await window.processOrderExecutionOutcomeStateTerminus('SUBMIT', utrStringVal);
+        };
+
+        window.processOrderExecutionOutcomeStateTerminus = async function(outcomeStateKey, utrRefStringInput = '') {
+            clearInterval(window.currentActiveCountdownTimerObjectRef);
+            window.closeModalWindow('modalTaskDetail');
+
+            const databaseKeyLogsDumpKey = `recharge_history_ledger_dump_logs_${window.activeScopeSessionUserIdentityUid}`;
+            const userHistoryLedgerArray = JSON.parse(localStorage.getItem(databaseKeyLogsDumpKey)) || [];
+
+            const newHistoryRowObjectSchema = {
+                timestamp: new Date().toLocaleString(),
+                amount: window.selectedTaskAmountValuePool,
+                utrRefCode: utrRefStringInput || 'N/A',
+                channelUpi: window.selectedUserUpiStringEndpointDraft
+            };
+
+            if(outcomeStateKey === 'TIMEOUT' || outcomeStateKey === 'CANCEL') {
+                const lockoutDbKey = `user_lockout_penalty_timestamp_logs_${window.activeScopeSessionUserIdentityUid}`;
+                const lockoutRegistry = JSON.parse(localStorage.getItem(lockoutDbKey)) || {};
+                
+                lockoutRegistry[window.selectedTaskAmountValuePool.toString()] = (Date.now() + (3 * 60 * 1000)).toString();
+                localStorage.setItem(lockoutDbKey, JSON.stringify(lockoutRegistry));
+
+                newHistoryRowObjectSchema.status = outcomeStateKey === 'TIMEOUT' ? 'Timeout' : 'Cancel';
+                userHistoryLedgerArray.unshift(newHistoryRowObjectSchema);
+                localStorage.setItem(databaseKeyLogsDumpKey, JSON.stringify(userHistoryLedgerArray));
+
+                alert(`PENALTY LOCKOUT TRIGGERED:\nAapne is order ko complete nahi kiya hai. Isliye aap agle 3 Minutes tak ₹${window.selectedTaskAmountValuePool} ka task order panel par dubaara buy nahi kar sakte!`);
+                window.renderInrTasks(); 
+            }
+            else if(outcomeStateKey === 'SUBMIT') {
+                newHistoryRowObjectSchema.status = 'In Payment';
+                userHistoryLedgerArray.unshift(newHistoryRowObjectSchema);
+                localStorage.setItem(databaseKeyLogsDumpKey, JSON.stringify(userHistoryLedgerArray));
+
+                try {
+                    // Realtime Server Injection Matrix directly mapping tracking console for approval loops
+                    await addDoc(collection(db, "recharge_orders"), {
+                        ownerUserId: window.activeScopeSessionUserIdentityUid,
+                        amount: window.selectedTaskAmountValuePool,
+                        userInrUtr: utrRefStringInput,
+                        channelUpi: window.selectedUserUpiStringEndpointDraft,
+                        imagePayload: window.temporaryScreenshotBase64Payload,
+                        status: 'Pending Verification Check',
+                        type: 'INR Bank Transfer Task',
+                        timestamp: new Date().toLocaleString()
+                    });
+                    
+                    alert("Order Submitted successfully! Awaiting Admin verification parameters block validation loops.");
+                } catch (error) {
+                    console.error("Cloud FireStore dropped packet synchronization logic run loop: ", error);
+                }
+            }
+            window.evaluateActiveUnverifiedOrdersPopupTriggerState();
+        };
+
+        window.evaluateActiveUnverifiedOrdersPopupTriggerState = async function() {
+            try {
+                const q = query(collection(db, "recharge_orders"), 
+                    where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid), 
+                    where("status", "==", "Pending Verification Check")
+                );
+                const querySnap = await getDocs(q);
+                
+                if(!querySnap.empty && !window.isPopupOverlayDismissedForThisInstanceRunLoop) {
+                    document.getElementById('modalTaskReminderPopupWall').classList.remove('hidden');
+                    window.initializePopupCancelLockCountdownTimer();
+                } else {
+                    document.getElementById('modalTaskReminderPopupWall').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Cloud verify loop failed: ", err);
+            }
+        };
+
+        window.initializePopupCancelLockCountdownTimer = function() {
+            const cancelBtn = document.getElementById('btnPopupCancelTimerLock');
+            cancelBtn.disabled = true;
+            cancelBtn.className = "flex-1 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl text-xs uppercase tracking-wide cursor-not-allowed select-none";
+            
+            let secondsLeft = 5; cancelBtn.innerText = `Cancel (${secondsLeft}s)`;
+            const interval = setInterval(() => {
+                secondsLeft--; cancelBtn.innerText = `Cancel (${secondsLeft}s)`;
+                if(secondsLeft <= 0) {
+                    clearInterval(interval); cancelBtn.disabled = false; cancelBtn.innerText = "Cancel";
+                    cancelBtn.className = "flex-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 rounded-xl text-xs uppercase tracking-wide cursor-pointer transition-colors shadow-2xs";
+                }
+            }, 1000);
+        };
+
+        window.dismissTaskReminderPopupOverlay = function() { window.isPopupOverlayDismissedForThisInstanceRunLoop = true; document.getElementById('modalTaskReminderPopupWall').classList.add('hidden'); };
+        window.jumpToActiveInPaymentRechargeLedger = function() { window.dismissTaskReminderPopupOverlay(); window.location.href = 'recharge_history.html'; };
+        
+        window.previewInrScreenshotBlobSelection = function() { 
+            const fileInput = document.getElementById('fieldInrScreenshotField'); 
+            if(fileInput.files && fileInput.files[0]) { 
+                const reader = new FileReader(); 
+                reader.onload = function(e) { 
+                    window.temporaryScreenshotBase64Payload = e.target.result; 
+                    document.getElementById('imgInrPreviewElement').src = window.temporaryScreenshotBase64Payload; 
+                    document.getElementById('imgInrPreviewElement').classList.remove('hidden'); 
+                    document.getElementById('boxImgPreviewPlaceholder').classList.add('hidden'); 
+                }; 
+                reader.readAsDataURL(fileInput.files[0]); 
+            } 
+        };
+
+        window.copyText = function(elementId) { const txt = document.getElementById(elementId).innerText; navigator.clipboard.writeText(txt); alert("Copied handle details code: " + txt); };
+        window.closeModalWindow = function(modalId) { document.getElementById(modalId).classList.add('hidden'); };
+        window.copyAddressTextString = function() { navigator.clipboard.writeText(document.getElementById('usdtAddressTxt').innerText); alert("TRC20 Wallet Address copied successfully!"); };
+        window.calculateCryptoConversion = function() { const amtUsdt = parseFloat(document.getElementById('inputUsdtAmount').value) || 0; document.getElementById('calcTotalInr').innerText = (amtUsdt * window.globalUsdtRate).toFixed(2); document.getElementById('calcBonusUsdt').innerText = ((amtUsdt * window.globalUsdtRate) * window.globalBonusRatio / 100).toFixed(2); };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initGlobalSystemEcosystemStreams();
+            window.evaluateActiveUnverifiedOrdersPopupTriggerState();
+        });
+    </script>
+</body>
+</html>
