@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenguinPay - Token History</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <div class="px-4 pt-6 pb-2 bg-white sticky top-0 z-50 border-b border-gray-50">
+            <div class="flex items-center justify-between h-10">
+                <button onclick="window.location.href='me.html'" class="text-gray-800 text-lg w-10 text-left">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="text-base font-black text-gray-900 tracking-tight flex-1 text-center">Token History</h1>
+                <div class="w-10"></div>
+            </div>
+
+            <div class="flex mt-4 border-b border-gray-100 text-xs font-bold text-gray-400 select-none overflow-x-auto hide-scrollbar space-x-2">
+                <button onclick="switchHistoryTab('All')" id="tabFilter-All" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer border-b-2 border-black text-black font-black">
+                    All Logs
+                </button>
+                <button onclick="switchHistoryTab('Deposit')" id="tabFilter-Deposit" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
+                    Deposits
+                </button>
+                <button onclick="switchHistoryTab('Withdraw')" id="tabFilter-Withdraw" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
+                    Withdrawals
+                </button>
+                <button onclick="switchHistoryTab('Rewards')" id="tabFilter-Rewards" class="flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer">
+                    Commissions
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-4 py-2 hide-scrollbar bg-white space-y-3">
+            
+            <div id="boxTokenHistoryRenderContainer" class="divide-y divide-gray-100/70">
+                <div class="text-center py-24 text-xs text-gray-400 italic font-medium">Synchronizing unified ecosystem logs...</div>
+            </div>
+
+        </div>
+
+        <div class="bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span>
+            </button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span>
+            </button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span>
+            </button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span>
+            </button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let activeTabCategory = 'All';
+        let fullyParsedUnifiedDataLogs = [];
+
+        // Core Realtime Multi-Collection Streams Aggregator
+        function startUnifiedHistoryPipelineSync() {
+            const container = document.getElementById('boxTokenHistoryRenderContainer');
+            const userUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
+
+            let streamsLoadedCounter = 0;
+            const targetTotalStreams = 3;
+
+            let internalDepositBuffer = [];
+            let internalWithdrawBuffer = [];
+            let internalCommissionBuffer = [];
+
+            function compileAndRenderFilters() {
+                // Merge all decoupled data channels into a clean system map array
+                fullyParsedUnifiedDataLogs = [...internalDepositBuffer, ...internalWithdrawBuffer, ...internalCommissionBuffer];
+                
+                // Sort by date-time descending tracking structures
+                fullyParsedUnifiedDataLogs.sort((x, y) => new Date(y.rawDate) - new Date(x.rawDate));
+
+                container.innerHTML = '';
+                let visibleRowsCounter = 0;
+
+                fullyParsedUnifiedDataLogs.forEach(item => {
+                    // Filter check condition logic match loops
+                    if (activeTabCategory !== 'All' && item.type !== activeTabCategory) return;
+
+                    visibleRowsCounter++;
+                    const blockRow = document.createElement('div');
+                    blockRow.className = "py-4 flex justify-between items-center bg-white border-b border-gray-50 last:border-none";
+
+                    let valueColorClass = "text-gray-900";
+                    let signPrefix = "";
+
+                    if (item.type === 'Deposit' || item.type === 'Rewards') {
+                        valueColorClass = "text-emerald-600";
+                        signPrefix = "+";
+                    } else if (item.type === 'Withdraw') {
+                        valueColorClass = "text-rose-600";
+                        signPrefix = "-";
+                    }
+
+                    blockRow.innerHTML = `
+                        <div class="space-y-1 text-left">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-black text-gray-900">${item.title}</span>
+                                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-md font-bold ${item.tagStyle}">${item.subtitle}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 font-mono font-bold tracking-tight">${item.date}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-black tracking-tight ${valueColorClass}">${signPrefix}₹${parseFloat(item.value).toFixed(2)}</span>
+                            ${item.metaInfo ? `<p class="text-[9px] font-semibold text-slate-400 tracking-tighter">${item.metaInfo}</p>` : ''}
+                        </div>`;
+                    
+                    container.appendChild(blockRow);
+                });
+
+                if (visibleRowsCounter === 0) {
+                    container.innerHTML = `<div class="text-center py-24 text-xs font-bold text-gray-300 italic">No transaction logs matching this category tab index.</div>`;
+                }
+            }
+
+            // 1. Pipeline Segment: Fetch Deposits Audit Streams
+            const depositQuery = query(collection(db, "depositReceiptLogs"), where("userUidTargetKey", "==", userUid));
+            onSnapshot(depositQuery, (snapshot) => {
+                internalDepositBuffer = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    internalDepositBuffer.push({
+                        type: 'Deposit',
+                        title: 'Wallet Deposit Topup',
+                        subtitle: data.status === 'Approved & Credited' ? 'Success' : 'In Payment',
+                        tagStyle: data.status === 'Approved & Credited' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600',
+                        date: data.timestamp || '',
+                        rawDate: data.timestamp || new Date().toISOString(),
+                        value: data.taskAmountValue || 0,
+                        metaInfo: data.userInrUtr ? `UTR: ${data.userInrUtr}` : ''
+                    });
+                });
+                compileAndRenderFilters();
+            });
+
+            // 2. Pipeline Segment: Fetch Manual Withdraw Ledger Logs
+            const withdrawQuery = query(collection(db, "withdraw_history"), where("userId", "==", userUid));
+            onSnapshot(withdrawQuery, (snapshot) => {
+                internalWithdrawBuffer = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    internalWithdrawBuffer.push({
+                        type: 'Withdraw',
+                        title: 'Manual Fund Payout',
+                        subtitle: data.status || 'Settled',
+                        tagStyle: 'bg-rose-50 text-rose-600',
+                        date: data.time || data.timestamp || '',
+                        rawDate: data.time || data.timestamp || new Date().toISOString(),
+                        value: data.amount || 0,
+                        metaInfo: data.utr ? `Ref UTR: ${data.utr}` : ''
+                    });
+                });
+                compileAndRenderFilters();
+            });
+
+            // 3. Pipeline Segment: Fetch Multilevel Affiliate Commission Streams
+            // Admin balance adjustment panels record this downstream dynamic commissions structure maps data inside user object
+            const commissionQuery = query(collection(db, "commission_history_logs"), where("receiverUid", "==", userUid));
+            onSnapshot(commissionQuery, (snapshot) => {
+                internalCommissionBuffer = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let downlineTierLabel = data.level === 1 ? "Level 1 Split" : "Level 2 Split";
+                    internalCommissionBuffer.push({
+                        type: 'Rewards',
+                        title: `Team Bonus commission`,
+                        subtitle: downlineTierLabel,
+                        tagStyle: data.level === 1 ? 'bg-indigo-50 text-indigo-600' : 'bg-purple-50 text-purple-600',
+                        date: data.timestamp || '',
+                        rawDate: data.timestamp || new Date().toISOString(),
+                        value: data.commissionEarnedAmount || 0,
+                        metaInfo: `From ID: ${data.downlineUidSource || 'Sub Node'}`
+                    });
+                });
+                compileAndRenderFilters();
+            });
+        }
+
+        // Horizontal Category Tab Navigator Switching Logic Handler
+        window.switchHistoryTab = function(targetKey) {
+            activeTabCategory = targetKey;
+
+            // Clear active rendering text labels styling classes elements arrays
+            document.querySelectorAll('.px-4.pt-6 button').forEach(btn => {
+                btn.className = "flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer text-gray-400 font-bold";
+            });
+
+            const targetActiveBtn = document.getElementById(`tabFilter-${targetKey}`);
+            if (targetActiveBtn) {
+                targetActiveBtn.className = "flex-1 pb-3 text-center whitespace-nowrap transition-all cursor-pointer border-b-2 border-black text-black font-black";
+            }
+
+            // Trigger local parsing array redraw cycle fallback
+            localStorage.setItem('token_history_last_active_tab', targetKey);
+            startUnifiedHistoryPipelineSync();
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastSessionTabPointer = localStorage.getItem('token_history_last_active_tab') || 'All';
+            switchHistoryTab(lastSessionTabPointer);
+        });
+    </script>
+</body>
+</html>

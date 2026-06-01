@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PenguinPay - Recharge History</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
+        
+        <!-- Header Section -->
+        <div class="px-4 pt-6 pb-2 bg-white sticky top-0 z-50 border-b border-gray-50">
+            <div class="flex items-center justify-between h-10">
+                <button onclick="window.location.href='me.html'" class="text-gray-800 text-lg w-10 text-left">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h1 class="text-base font-black text-gray-900 tracking-tight flex-1 text-center">Recharge History</h1>
+                <div class="w-10"></div> <!-- Spacer for perfect centering -->
+            </div>
+
+            <!-- Currency Tabs (USDT / INR) -->
+            <div class="flex mt-4 border-b border-gray-100">
+                <button onclick="switchCurrencyTab('USDT')" id="btnTabCurrency-USDT" class="flex-1 pb-3 text-sm font-bold text-gray-400 transition-all cursor-pointer relative">
+                    USDT
+                </button>
+                <button onclick="switchCurrencyTab('INR')" id="btnTabCurrency-INR" class="flex-1 pb-3 text-sm font-bold text-gray-400 transition-all cursor-pointer relative">
+                    INR
+                </button>
+            </div>
+
+            <!-- Status Horizontal Scroll Sub-Tabs (Sirf INR ke liye active rahega) -->
+            <div id="statusSubFilterContainer" class="flex items-center space-x-6 overflow-x-auto py-3 px-1 hide-scrollbar text-xs font-bold text-gray-400 select-none">
+                <button onclick="applyStatusSubFilter('All')" id="subFilter-All" class="whitespace-nowrap transition-all cursor-pointer text-gray-900 border-b-2 border-black pb-1">All</button>
+                <button onclick="applyStatusSubFilter('Pending Verification Audit')" id="subFilter-InPayment" class="whitespace-nowrap transition-all cursor-pointer pb-1">In Payment</button>
+                <button onclick="applyStatusSubFilter('Approved & Credited')" id="subFilter-Success" class="whitespace-nowrap transition-all cursor-pointer pb-1">Success</button>
+                <button onclick="applyStatusSubFilter('Timeout')" id="subFilter-Timeout" class="whitespace-nowrap transition-all cursor-pointer pb-1">Timeout</button>
+                <button onclick="applyStatusSubFilter('Rejected & Failed Verification Audit')" id="subFilter-Cancel" class="whitespace-nowrap transition-all cursor-pointer pb-1">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Main Dynamic History Log Content Frame -->
+        <div class="flex-1 overflow-y-auto px-4 py-2 hide-scrollbar bg-white space-y-3">
+            
+            <!-- Static Informative Task Alert Banner -->
+            <div id="bannerTaskReminder" class="bg-[#EEF2FF] rounded-xl p-3.5 flex items-center space-x-2 text-[11px] font-bold text-gray-700 border border-indigo-50/50">
+                <div class="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center text-white text-xs shrink-0 shadow-3xs">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <span>Complete a task to earn Commission and Bonus</span>
+            </div>
+
+            <!-- Realtime Dynamic Render Datastore List Grid -->
+            <div id="boxHistoryLogsRenderContainer" class="divide-y divide-gray-100/70">
+                <!-- Data elements arrays mapping dynamically through Firestore snapshots streams -->
+                <div class="text-center py-20 text-xs text-gray-400 italic font-medium">Connecting database cloud matrix streams...</div>
+            </div>
+
+        </div>
+
+        <!-- Sticky Navigation Footer -->
+        <div class="bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
+            <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span>
+            </button>
+            <button onclick="window.location.href='deposit.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-right-left text-lg"></i> <span class="text-[10px] tracking-wide">Deposit</span>
+            </button>
+            <button onclick="window.location.href='upi.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-briefcase text-lg"></i> <span class="text-[10px] tracking-wide">UPI</span>
+            </button>
+            <button onclick="window.location.href='team.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-chart-pie text-lg"></i> <span class="text-[10px] tracking-wide">Team</span>
+            </button>
+            <button onclick="window.location.href='me.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
+                <i class="fa-solid fa-user-astronaut text-lg"></i> <span class="text-[10px] tracking-wide">Me</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Firebase System Modules Architecture Sync -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let activeCurrencyTabMode = localStorage.getItem('history_target_tab') || 'INR';
+        let activeStatusSubFilterKey = 'All';
+
+        // Core Realtime Realignment Pipeline Realizer
+        function loadSyncActiveLedgerStream() {
+            const container = document.getElementById('boxHistoryLogsRenderContainer');
+            const targetUserUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
+
+            // Establish target Firestore collection pointer based on currency mode
+            // INR path points to administrative screenshot audit verification bucket logs
+            const collectionName = (activeCurrencyTabMode === 'INR') ? "depositReceiptLogs" : "usdt_recharge_logs";
+            const targetQueryField = (activeCurrencyTabMode === 'INR') ? "userUidTargetKey" : "userId";
+
+            const historyQuery = query(collection(db, collectionName), where(targetQueryField, "==", targetUserUid));
+
+            onSnapshot(historyQuery, (snapshot) => {
+                container.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `<div class="text-center py-24 text-xs font-bold text-gray-300 italic">No transaction records mapped inside database.</div>`;
+                    return;
+                }
+
+                let executionRowCounter = 0;
+
+                snapshot.forEach((docNode) => {
+                    const row = docNode.data();
+                    
+                    // Normalize parameters map structures from backend configurations keys differences
+                    let amountValue = row.taskAmountValue || row.amount || '0';
+                    let statusLabel = row.status || 'Pending Verification Audit';
+                    let transactionDate = row.timestamp || row.time || '';
+                    let utrReferenceString = row.userInrUtr || row.utr || '';
+                    let tokenEquivalent = row.tokenValue || '';
+
+                    // Apply internal Javascript runtime filter exclusions logic mapping step
+                    if (activeStatusSubFilterKey !== 'All' && statusLabel !== activeStatusSubFilterKey) {
+                        return;
+                    }
+
+                    executionRowCounter++;
+                    const cardNode = document.createElement('div');
+                    cardNode.className = "py-4 flex justify-between items-start text-left bg-white font-sans transition-all";
+
+                    // Map Custom Status Labels Translations for UI
+                    let badgeColorStyle = "text-amber-500 bg-amber-50";
+                    let displayStatusName = "In Payment";
+
+                    if (statusLabel === "Approved & Credited" || statusLabel === "Success") {
+                        badgeColorStyle = "text-emerald-500 bg-emerald-50";
+                        displayStatusName = "Success";
+                    } else if (statusLabel === "Rejected & Failed Verification Audit" || statusLabel === "Cancel" || statusLabel === "Rejected") {
+                        badgeColorStyle = "text-rose-500 bg-rose-50";
+                        displayStatusName = "Cancel";
+                    } else if (statusLabel === "Timeout") {
+                        badgeColorStyle = "text-gray-400 bg-gray-50";
+                        displayStatusName = "Timeout";
+                    }
+
+                    // Render markup architecture profiles matching shared parameters graphics
+                    if (activeCurrencyTabMode === 'INR') {
+                        cardNode.innerHTML = `
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-base font-black text-gray-900">${amountValue} RS</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-wide uppercase ${badgeColorStyle}">${displayStatusName}</span>
+                                </div>
+                                <div class="text-[11px] font-bold text-gray-400 space-y-0.5">
+                                    <p>Income <span class="ml-4 font-normal text-gray-500">Quota</span></p>
+                                    <p class="text-gray-800 font-extrabold">${(amountValue * 0.04).toFixed(1)} <span class="ml-10 text-emerald-500 font-black">+${(amountValue * 1.04).toFixed(1)}</span></p>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col justify-between items-end h-14">
+                                ${utrReferenceString ? `<span class="text-[10px] font-mono font-bold text-gray-900 tracking-tighter">UTR:${utrReferenceString}</span>` : '<i class="fa-solid fa-chevron-right text-gray-300 text-xs pt-1"></i>'}
+                            </div>`;
+                    } else {
+                        // USDT Custom History Panel View layout design sync
+                        cardNode.innerHTML = `
+                            <div class="space-y-1.5 py-1 w-full">
+                                <div class="flex justify-between items-center w-full">
+                                    <span class="text-sm font-black text-[#1E56B2] uppercase">USDT: ${amountValue}</span>
+                                    <span class="text-[10px] font-bold text-gray-400">Token ${tokenEquivalent || (amountValue * 106.08).toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 tracking-tight">
+                                    <div class="flex space-x-1"><span class="text-gray-400 uppercase font-black">Get</span></div>
+                                    <div class="flex space-x-4"><span>Time</span><span class="font-mono text-gray-500 font-semibold">${transactionDate}</span></div>
+                                </div>
+                            </div>`;
+                    }
+
+                    container.appendChild(cardNode);
+                });
+
+                if (executionRowCounter === 0) {
+                    container.innerHTML = `<div class="text-center py-24 text-xs font-bold text-gray-300 italic">No matching transactions inside this sub-category tab.</div>`;
+                }
+            });
+        }
+
+        // Global Interactive Currency Switching Mechanics Hook
+        window.switchCurrencyTab = function(targetCurrencyCode) {
+            activeCurrencyTabMode = targetCurrencyCode;
+            localStorage.setItem('history_target_tab', targetCurrencyCode);
+            activeStatusSubFilterKey = 'All'; // Reset category status loop tracking rules
+
+            const subFiltersBlock = document.getElementById('statusSubFilterContainer');
+            if (targetCurrencyCode === 'USDT') {
+                subFiltersBlock.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                subFiltersBlock.classList.remove('opacity-0', 'pointer-events-none');
+            }
+
+            syncCurrencyTabsUiLayoutHeadersStyles();
+            applyStatusSubFilter('All');
+        };
+
+        // Sub Category Filter Assignment Execution Flow Logic Layer
+        window.applyStatusSubFilter = function(filterStatusString) {
+            activeStatusSubFilterKey = filterStatusString;
+            
+            // Clean and redraw tab alignment highlights classes layout elements arrays
+            document.querySelectorAll('#statusSubFilterContainer button').forEach(btn => {
+                btn.className = "whitespace-nowrap transition-all cursor-pointer pb-1";
+            });
+
+            const mapBtnIds = {
+                'All': 'subFilter-All',
+                'Pending Verification Audit': 'subFilter-InPayment',
+                'Approved & Credited': 'subFilter-Success',
+                'Timeout': 'subFilter-Timeout',
+                'Rejected & Failed Verification Audit': 'subFilter-Cancel'
+            };
+
+            const activeBtn = document.getElementById(mapBtnIds[filterStatusString]);
+            if (activeBtn) {
+                activeBtn.className = "whitespace-nowrap transition-all cursor-pointer text-gray-900 border-b-2 border-black pb-1 font-black";
+            }
+
+            loadSyncActiveLedgerStream();
+        };
+
+        function syncCurrencyTabsUiLayoutHeadersStyles() {
+            const btnUsdt = document.getElementById('btnTabCurrency-USDT');
+            const btnInr = document.getElementById('btnTabCurrency-INR');
+
+            if (activeCurrencyTabMode === 'USDT') {
+                btnUsdt.className = "flex-1 pb-3 text-base font-black text-black border-b-2 border-black transition-all cursor-pointer";
+                btnInr.className = "flex-1 pb-3 text-sm font-bold text-gray-400 transition-all cursor-pointer";
+            } else {
+                btnInr.className = "flex-1 pb-3 text-base font-black text-black border-b-2 border-black transition-all cursor-pointer";
+                btnUsdt.className = "flex-1 pb-3 text-sm font-bold text-gray-400 transition-all cursor-pointer";
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Read environment routing params map states values upon initializer cycles load loops
+            switchCurrencyTab(activeCurrencyTabMode);
+        });
+    </script>
+</body>
+</html>
