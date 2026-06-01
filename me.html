@@ -17,6 +17,7 @@
 
     <div class="bg-white w-full max-w-md min-h-screen md:min-h-[850px] flex flex-col justify-between shadow-xl md:rounded-3xl overflow-hidden relative border border-gray-100">
         
+        <!-- Main Profile Workspace -->
         <div id="subView-mainProfile" class="flex-1 overflow-y-auto pb-24 hide-scrollbar">
             
             <div class="px-5 pt-8 pb-5 text-left bg-white">
@@ -26,12 +27,16 @@
                 </div>
                 <div class="text-xs text-gray-400 font-bold mt-1">ID: <span id="lblUserProfileId">20012569</span></div>
 
+                <!-- Live Active Balance Node -->
                 <div class="mt-5 flex justify-between items-center bg-white border border-gray-100/70 p-5 rounded-2xl shadow-2xs">
                     <div class="space-y-1">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                             <i class="fa-solid fa-chart-pie text-[#1E56B2]"></i> Quota
                         </span>
-                        <div class="flex items-baseline"><span id="lblUserQuotaBalance" class="text-3xl font-black text-gray-900">0</span><span class="text-xs font-black ml-1 text-gray-800">INR</span></div>
+                        <div class="flex items-baseline">
+                            <span id="lblUserQuotaBalance" class="text-3xl font-black text-gray-900">0.00</span>
+                            <span class="text-xs font-black ml-1 text-gray-800">INR</span>
+                        </div>
                         <p class="text-[10px] font-bold text-gray-400">Reward ratio <span id="lblUserRewardRatio">2%</span></p>
                     </div>
                     <button onclick="window.location.href='deposit.html'" data-translate="top_up" class="bg-black hover:bg-gray-900 text-white text-xs font-black px-6 py-3 rounded-xl shadow-md transition-all cursor-pointer">Top up</button>
@@ -46,13 +51,22 @@
                 </div>
             </div>
 
+            <!-- Navigation Lists -->
             <div class="px-4 space-y-2">
-                <div onclick="window.location.href='recharge_history.html'" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
-                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-clock-rotate-left w-5 text-gray-400 text-sm"></i> <span data-translate="recharge_history">Recharge History</span></div>
+                <!-- Click Redirection triggers link to recharge_history.html -->
+                <div onclick="triggerJumpRedirection('INR')" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700">
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-gray-400 text-sm"></i> 
+                        <span data-translate="recharge_history">Recharge History</span>
+                    </div>
                     <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
                 </div>
+                <!-- Click Redirection triggers link to token_history.html -->
                 <div onclick="window.location.href='token_history.html'" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs">
-                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700"><i class="fa-solid fa-file-invoice-dollar w-5 text-gray-400 text-sm"></i> <span data-translate="token_history">Token History</span></div>
+                    <div class="flex items-center space-x-3 text-xs font-bold text-gray-700">
+                        <i class="fa-solid fa-file-invoice-dollar w-5 text-gray-400 text-sm"></i> 
+                        <span data-translate="token_history">Token History</span>
+                    </div>
                     <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
                 </div>
                 <div onclick="toggleLanguageConfiguration()" class="p-4 bg-white border border-gray-50 rounded-xl flex justify-between items-center cursor-pointer hover:bg-gray-50/50 transition-colors shadow-3xs select-none">
@@ -70,6 +84,7 @@
             </div>
         </div>
 
+        <!-- SubView Frames Modules (Hidden Layouts) -->
         <div id="viewFrame-accountInfo" class="flex-1 overflow-y-auto pb-24 hide-scrollbar hidden bg-white">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center sticky top-0 bg-white z-50">
                 <button onclick="closeProfileSubView('viewFrame-accountInfo')" class="text-gray-700 mr-4 text-base"><i class="fa-solid fa-chevron-left"></i></button>
@@ -107,7 +122,6 @@
                 <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6 uppercase">PIN</h2>
             </div>
             <div class="p-6 space-y-5 text-left">
-                
                 <div>
                     <label class="block text-xs font-black text-gray-700 uppercase tracking-wide mb-2">Old PIN</label>
                     <div class="flex space-x-2 justify-between"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"><input type="password" maxlength="1" class="pin-box w-10 h-12 text-center bg-gray-50 border border-gray-100 rounded-lg text-lg font-black"></div>
@@ -127,9 +141,9 @@
             </div>
         </div>
 
+        <!-- Helpdesk Support Modal Overlay -->
         <div id="modalSupportChannels" class="absolute inset-0 bg-black/40 z-50 flex flex-col justify-end hidden select-none transition-all">
             <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl space-y-6 animate-slide-up">
-                
                 <div class="grid grid-cols-2 gap-4 text-center py-4">
                     <div onclick="triggerSupportRedirect('telegram')" class="p-5 border border-gray-100 rounded-2xl bg-gray-50/60 hover:bg-blue-50/30 cursor-pointer flex flex-col items-center space-y-2 transition-all">
                         <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl shadow-xs"><i class="fa-brands fa-telegram"></i></div>
@@ -140,11 +154,11 @@
                         <span class="text-xs font-black text-gray-700">WhatsApp</span>
                     </div>
                 </div>
-
                 <button onclick="closeContactSupportOverlay()" class="w-full bg-gray-100 text-gray-600 font-bold py-3.5 rounded-xl text-xs uppercase cursor-pointer">Close</button>
             </div>
         </div>
 
+        <!-- Bottom Tabbed Sticky Footer -->
         <div class="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-2 py-2.5 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-40">
             <button onclick="window.location.href='home.html'" class="footer-tab flex-1 flex flex-col items-center gap-1 text-gray-400 font-medium transition-all cursor-pointer">
                 <i class="fa-solid fa-house text-lg"></i> <span class="text-[10px] tracking-wide">Home</span>
@@ -165,32 +179,82 @@
 
     </div>
 
+    <!-- Firebase SDK Implementation Block -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
+            authDomain: "nexapay-342d0.firebaseapp.com",
+            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
+            projectId: "nexapay-342d0",
+            storageBucket: "nexapay-342d0.firebasestorage.app",
+            messagingSenderId: "305096071099",
+            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
+            measurementId: "G-9S068TQ2CS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Core Realtime Sync Pipeline Listener
+        function subscribeToUserProfileDatabaseMetrics() {
+            const activeUserUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
+            const userPhone = localStorage.getItem('userRegisteredPhoneString') || '9983243312';
+            
+            document.getElementById('lblUserProfileId').innerText = activeUserUid;
+            document.getElementById('lblInfoMetaId').innerText = activeUserUid;
+            document.getElementById('lblInfoMetaPhone').innerText = userPhone;
+
+            // Firestore Realtime Stream Engine
+            const userDocRef = doc(db, "users", activeUserUid);
+            onSnapshot(userDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const matchedUserNode = snapshot.data();
+                    
+                    // Core Validation Rule: Show balance only if real recharge history exists
+                    if (matchedUserNode.hasRecharged === true) {
+                        const balPoolVal = parseFloat(matchedUserNode.recharge || '0.00');
+                        document.getElementById('lblUserQuotaBalance').innerText = balPoolVal.toFixed(2);
+                    } else {
+                        document.getElementById('lblUserQuotaBalance').innerText = "0.00";
+                    }
+                }
+            }, (error) => {
+                console.error("Firestore real-time gateway exception handler drops: ", error);
+            });
+
+            // Fetch Global System Controls (Bonus Settings)
+            const globalConfigRef = doc(db, "system_settings", "global_config");
+            onSnapshot(globalConfigRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const settingsData = snapshot.data();
+                    const globalBonusRatio = String(settingsData.bonusRatio || '2');
+                    document.getElementById('lblUserRewardRatio').innerText = globalBonusRatio.endsWith('%') ? globalBonusRatio : globalBonusRatio + '%';
+                }
+            });
+        }
+
+        // Global Nav Link Jump Hook Handler
+        window.triggerJumpRedirection = function(targetCurrencyHeader) {
+            localStorage.setItem('history_target_tab', targetCurrencyHeader);
+            window.location.href = 'recharge_history.html';
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            subscribeToUserProfileDatabaseMetrics();
+        });
+    </script>
+
+    <!-- Legacy Utility Controls Mapping Section -->
     <script>
-        // Language dictionaries translation block strings keys mapping data arrays
         const langPack = {
             en: { edit_profile: "Edit profile", top_up: "Top up", recharge_history: "Recharge History", token_history: "Token History", languages: "Languages", contact_us: "Contact Us", sign_out: "Sign Out", account_info: "Account Info", change_password: "Change Password", submit: "Submit", password: "Password" },
             hi: { edit_profile: "प्रोफ़ाइल संपादित करें", top_up: "टॉप अप करें", recharge_history: "रिचार्ज का इतिहास", token_history: "टोकन का इतिहास", languages: "भाषा बदलें", contact_us: "हमसे संपर्क करें", sign_out: "लॉग आउट करें", account_info: "खाते की जानकारी", change_password: "पासवर्ड बदलें", submit: "जमा करें", password: "पासवर्ड" }
         };
 
         let activeLanguageMode = localStorage.getItem('appLangMode') || 'en';
-
-        function initializeMeWorkspace() {
-            // Setup dynamic wallet balances logs properties variables sets
-            const activeUserUid = localStorage.getItem('sessionUserIdentityId') || '20012569';
-            const userPhone = localStorage.getItem('userRegisteredPhoneString') || '9983243312';
-            const liveBalance = parseFloat(localStorage.getItem(`user_bal_pool_${activeUserUid}`) || '51.82');
-            const globalBonusRatio = localStorage.getItem('bonusRatio') || '2';
-
-            document.getElementById('lblUserProfileId').innerText = activeUserUid;
-            document.getElementById('lblInfoMetaId').innerText = activeUserUid;
-            document.getElementById('lblInfoMetaPhone').innerText = userPhone;
-            document.getElementById('lblUserQuotaBalance').innerText = liveBalance.toFixed(2);
-            document.getElementById('lblUserRewardRatio').innerText = globalBonusRatio.endsWith('%') ? globalBonusRatio : globalBonusRatio + '%';
-
-            // Automatic incremental focus chain loop triggers inside PIN boxes components fields
-            setupPinInputsAutofocusChain();
-            applyLanguageTranslations();
-        }
 
         function openProfileSubView(frameId) {
             document.getElementById('subView-mainProfile').classList.add('hidden');
@@ -227,10 +291,8 @@
         }
 
         function triggerSupportRedirect(channel) {
-            // Extract external URLs variables saved inside Master Admin Panel Control center datasets fields array
             const telegramUrl = localStorage.getItem('adminSupportTelegramUrl') || 'https://t.me/PenguinPaySupport';
             const whatsappUrl = localStorage.getItem('adminSupportWhatsappUrl') || 'https://wa.me/919983243312';
-
             const targetDestinationLink = (channel === 'telegram') ? telegramUrl : whatsappUrl;
             window.open(targetDestinationLink, '_blank');
         }
@@ -265,7 +327,10 @@
             }
         }
 
-        window.onload = initializeMeWorkspace;
+        window.addEventListener('DOMContentLoaded', () => {
+            setupPinInputsAutofocusChain();
+            applyLanguageTranslations();
+        });
     </script>
 </body>
 </html>
