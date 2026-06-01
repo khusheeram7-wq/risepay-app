@@ -16,7 +16,7 @@
 </head>
 <body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
 
-    <div id="modalTaskReminderPopupWall" class="fixed inset-0 bg-black/50 z-[9999] flex flex-col justify-center items-center px-4 hidden select-none animate-fade-in">
+    <div id="modalTaskReminderPopupWall" class="fixed inset-0 bg-black/50 z-[9999] flex flex-col justify-center items-center px-4 hidden select-none">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-5 text-center shadow-2xl border border-gray-100">
             <div class="space-y-1">
                 <h3 class="text-base font-black text-gray-900 tracking-tight">Task Reminders</h3>
@@ -95,7 +95,7 @@
         </div>
 
         <div id="modalSelectUpi" class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end hidden transition-all">
-            <div class="bg-white w-full rounded-t-3xl p-6 space-y-5 shadow-2xl animate-slide-up">
+            <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl space-y-5 shadow-2xl animate-slide-up">
                 <div class="text-center font-black text-gray-800 text-base">Select Send UPI</div>
                 
                 <div id="boxDynamicSendUpiRadioOptionAnchor" class="space-y-2"></div>
@@ -116,7 +116,7 @@
 
             <div class="flex-1 overflow-y-auto p-5 space-y-5 hide-scrollbar bg-white">
                 <div class="bg-rose-50 text-rose-600 font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 border border-rose-100 shadow-3xs">
-                    <i class="fa-regular fa-clock text-sm animate-spin-slow"></i> 
+                    <i class="fa-regular fa-clock text-sm"></i> 
                     <span class="tracking-wide">Time Left: <span id="lblCountdownTimerClock" class="font-mono font-black text-sm">05:00</span></span>
                 </div>
 
@@ -169,7 +169,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, addDoc, getDocs, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
@@ -185,7 +185,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // State managers matching global functional components window logic mapping 
+        // Global properties definitions assignment 
         window.currentScopeGateTab = 'inr';
         window.currentInrSubTabClass = 'Task'; 
         window.currentFilterSortDirectionDirection = 'LOW-TO-HIGH';
@@ -203,7 +203,7 @@
         
         let firebaseFetchedTasksList = [];
 
-        // Realtime Global Variables Database Config Sync Pipeline Listener Loop
+        // Dynamic System Config Pipeline Hooks
         function initGlobalSystemEcosystemStreams() {
             onSnapshot(doc(db, "system_settings", "global_config"), (snapshot) => {
                 if(snapshot.exists()){
@@ -223,12 +223,15 @@
                 }
             });
 
-            // Live Realtime Task Generator Stream mapping admin actions
-            onSnapshot(collection(db, "deposit_tasks"), (snapshot) => {
+            // Live task configurations sync mapping core administrative panel layout
+            onSnapshot(doc(db, "inr_tasks_pool", "active_tasks"), (snapshot) => {
                 firebaseFetchedTasksList = [];
-                snapshot.forEach(docNode => {
-                    firebaseFetchedTasksList.push({ id: docNode.id, ...docNode.data() });
-                });
+                if(snapshot.exists() && snapshot.data().inrTasksList) {
+                    const poolArray = snapshot.data().inrTasksList;
+                    poolArray.forEach(val => {
+                        firebaseFetchedTasksList.push({ amount: val });
+                    });
+                }
                 window.renderInrTasks();
             });
         }
@@ -275,10 +278,8 @@
             const minVal = parseFloat(document.getElementById('txtFilterMinRange').value) || 0;
             const maxVal = parseFloat(document.getElementById('txtFilterMaxRange').value) || Infinity;
 
-            // Tasks Fallback array layer if remote database collection cluster nodes scale turns null
             const backupTasksList = [
-                { amount: 200 }, { amount: 500 }, { amount: 1200 }, { amount: 8000 },
-                { amount: 15000 }, { amount: 25000 }, { amount: 50000 }
+                { amount: 500 }, { amount: 1170 }, { amount: 667 }, { amount: 665 }, { amount: 300 }
             ];
 
             let activeProcessingSource = firebaseFetchedTasksList.length > 0 ? firebaseFetchedTasksList : backupTasksList;
@@ -322,16 +323,16 @@
 
             visibleFilteredTasksList.forEach(task => {
                 const numericAmt = parseFloat(task.amount);
-                const computedIncome = (numericAmt * (parseFloat(window.globalInrBonus)/100)).toFixed(2);
-                const computedQuota = (numericAmt + parseFloat(computedIncome)).toFixed(2);
+                const computedIncome = (numericAmt * (parseFloat(window.globalInrBonus)/100)).toFixed(1);
+                const computedQuota = (numericAmt + parseFloat(computedIncome)).toFixed(1);
 
                 const cardNodeRow = document.createElement('div');
                 cardNodeRow.className = "bg-white p-3.5 flex justify-between items-center border-b border-gray-100 text-left";
                 cardNodeRow.innerHTML = `
                     <div>
-                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${numericAmt.toFixed(0)} INR</h3>
+                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${numericAmt.toFixed(0)} RS</h3>
                         <div class="flex space-x-6 text-xs mt-1 text-gray-400 font-semibold tracking-wide">
-                            <div>Income<span class="block text-gray-800 font-black mt-0.5">${parseFloat(computedIncome)} <span class="text-gray-400 font-normal text-[10px]">(${parseFloat(window.globalInrBonus)}%)</span></span></div>
+                            <div>Income<span class="block text-gray-800 font-black mt-0.5">${parseFloat(computedIncome)}</span></div>
                             <div>Quota<span class="block text-[#0ea5e9] font-black mt-0.5">+${parseFloat(computedQuota)}</span></div>
                         </div>
                     </div>
@@ -343,11 +344,9 @@
 
         window.handleTaskBuyActionTrigger = async function(amount) {
             try {
-                // Keval log-in user ki verified send channel UPI list live update target mapping
                 const upiQueryRef = query(collection(db, "user_upi_accounts"), 
                     where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid),
-                    where("scopeChannel", "==", "send"),
-                    where("isSaleActive", "==", true)
+                    where("scopeChannel", "==", "send")
                 );
                 
                 const upiSnapshot = await getDocs(upiQueryRef);
@@ -372,7 +371,7 @@
                     labelRowNode.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50 bg-white shadow-2xs transition-all active:scale-[0.99]";
                     labelRowNode.innerHTML = `
                         <div class="flex items-center space-x-3 text-left">
-                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1E56B2] text-xs font-black flex items-center justify-center uppercase font-mono">${account.providerName ? account.providerName.substring(0,2) : 'UP'}</div>
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1E56B2] text-xs font-black flex items-center justify-center uppercase font-mono">UP</div>
                             <div><span class="text-sm font-black text-gray-800 font-mono block">${account.vpaAddress}</span></div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
@@ -381,7 +380,7 @@
                 document.getElementById('modalSelectUpi').classList.remove('hidden');
 
             } catch (err) {
-                console.error("Error building live client context channel profiles mapping: ", err);
+                console.error("Error mapping live user send UPI vectors: ", err);
             }
         };
 
@@ -393,7 +392,6 @@
         window.proceedToTaskBankDetailsPage = async function() {
             window.closeModalWindow('modalSelectUpi');
 
-            // Load Admin Target Receiver Account Configurations from live Cloud Document
             try {
                 const bankSnap = await getDoc(doc(db, "system_settings", "bank_config"));
                 if(bankSnap.exists()) {
@@ -405,7 +403,7 @@
                     document.getElementById('lblBankRemark').innerText = bankData.adminBankRemarkCode || 'SP1eashqv76d';
                 }
             } catch (err) {
-                console.error("Failed fetching live bank configuration channels mapping matrix: ", err);
+                console.error("Failed fetching live bank config: ", err);
             }
 
             document.getElementById('lblMetaPaymentChannel').innerText = window.selectedUserUpiStringEndpointDraft;
@@ -452,23 +450,12 @@
             if(utrStringVal.length < 12 || isNaN(utrStringVal)) { alert("Please input complete valid 12 digit reference number UTR code details!"); return; }
             if(!window.temporaryScreenshotBase64Payload) { alert("Please snap or upload the transaction payment screenshot receipt file proof!"); return; }
             
-            // Trigger dynamic saving loop
             await window.processOrderExecutionOutcomeStateTerminus('SUBMIT', utrStringVal);
         };
 
         window.processOrderExecutionOutcomeStateTerminus = async function(outcomeStateKey, utrRefStringInput = '') {
             clearInterval(window.currentActiveCountdownTimerObjectRef);
             window.closeModalWindow('modalTaskDetail');
-
-            const databaseKeyLogsDumpKey = `recharge_history_ledger_dump_logs_${window.activeScopeSessionUserIdentityUid}`;
-            const userHistoryLedgerArray = JSON.parse(localStorage.getItem(databaseKeyLogsDumpKey)) || [];
-
-            const newHistoryRowObjectSchema = {
-                timestamp: new Date().toLocaleString(),
-                amount: window.selectedTaskAmountValuePool,
-                utrRefCode: utrRefStringInput || 'N/A',
-                channelUpi: window.selectedUserUpiStringEndpointDraft
-            };
 
             if(outcomeStateKey === 'TIMEOUT' || outcomeStateKey === 'CANCEL') {
                 const lockoutDbKey = `user_lockout_penalty_timestamp_logs_${window.activeScopeSessionUserIdentityUid}`;
@@ -477,34 +464,25 @@
                 lockoutRegistry[window.selectedTaskAmountValuePool.toString()] = (Date.now() + (3 * 60 * 1000)).toString();
                 localStorage.setItem(lockoutDbKey, JSON.stringify(lockoutRegistry));
 
-                newHistoryRowObjectSchema.status = outcomeStateKey === 'TIMEOUT' ? 'Timeout' : 'Cancel';
-                userHistoryLedgerArray.unshift(newHistoryRowObjectSchema);
-                localStorage.setItem(databaseKeyLogsDumpKey, JSON.stringify(userHistoryLedgerArray));
-
                 alert(`PENALTY LOCKOUT TRIGGERED:\nAapne is order ko complete nahi kiya hai. Isliye aap agle 3 Minutes tak ₹${window.selectedTaskAmountValuePool} ka task order panel par dubaara buy nahi kar sakte!`);
                 window.renderInrTasks(); 
             }
             else if(outcomeStateKey === 'SUBMIT') {
-                newHistoryRowObjectSchema.status = 'In Payment';
-                userHistoryLedgerArray.unshift(newHistoryRowObjectSchema);
-                localStorage.setItem(databaseKeyLogsDumpKey, JSON.stringify(userHistoryLedgerArray));
-
                 try {
-                    // Realtime Server Injection Matrix directly mapping tracking console for approval loops
-                    await addDoc(collection(db, "recharge_orders"), {
-                        ownerUserId: window.activeScopeSessionUserIdentityUid,
-                        amount: window.selectedTaskAmountValuePool,
+                    // Central Standalone Datastore Sync matching user ledger screens flow requirements
+                    await addDoc(collection(db, "depositReceiptLogs"), {
+                        userUidTargetKey: window.activeScopeSessionUserIdentityUid,
+                        taskAmountValue: window.selectedTaskAmountValuePool,
                         userInrUtr: utrRefStringInput,
-                        channelUpi: window.selectedUserUpiStringEndpointDraft,
+                        channelUpiTargetEndpoint: window.selectedUserUpiStringEndpointDraft,
                         imagePayload: window.temporaryScreenshotBase64Payload,
-                        status: 'Pending Verification Check',
-                        type: 'INR Bank Transfer Task',
+                        status: 'Pending Verification Audit',
                         timestamp: new Date().toLocaleString()
                     });
                     
                     alert("Order Submitted successfully! Awaiting Admin verification parameters block validation loops.");
                 } catch (error) {
-                    console.error("Cloud FireStore dropped packet synchronization logic run loop: ", error);
+                    console.error("Cloud Firestore transmission error packet dropped: ", error);
                 }
             }
             window.evaluateActiveUnverifiedOrdersPopupTriggerState();
@@ -512,9 +490,9 @@
 
         window.evaluateActiveUnverifiedOrdersPopupTriggerState = async function() {
             try {
-                const q = query(collection(db, "recharge_orders"), 
-                    where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid), 
-                    where("status", "==", "Pending Verification Check")
+                const q = query(collection(db, "depositReceiptLogs"), 
+                    where("userUidTargetKey", "==", window.activeScopeSessionUserIdentityUid), 
+                    where("status", "==", "Pending Verification Audit")
                 );
                 const querySnap = await getDocs(q);
                 
@@ -545,7 +523,7 @@
         };
 
         window.dismissTaskReminderPopupOverlay = function() { window.isPopupOverlayDismissedForThisInstanceRunLoop = true; document.getElementById('modalTaskReminderPopupWall').classList.add('hidden'); };
-        window.jumpToActiveInPaymentRechargeLedger = function() { window.dismissTaskReminderPopupOverlay(); window.location.href = 'recharge_history.html'; };
+        window.jumpToActiveInPaymentRechargeLedger = function() { window.dismissTaskReminderPopupOverlay(); localStorage.setItem('history_target_tab', 'INR'); window.location.href = 'recharge_history.html'; };
         
         window.previewInrScreenshotBlobSelection = function() { 
             const fileInput = document.getElementById('fieldInrScreenshotField'); 
@@ -561,7 +539,7 @@
             } 
         };
 
-        window.copyText = function(elementId) { const txt = document.getElementById(elementId).innerText; navigator.clipboard.writeText(txt); alert("Copied handle details code: " + txt); };
+        window.copyText = function(elementId) { const txt = document.getElementById(elementId).innerText; navigator.clipboard.writeText(txt); alert("Copied details: " + txt); };
         window.closeModalWindow = function(modalId) { document.getElementById(modalId).classList.add('hidden'); };
         window.copyAddressTextString = function() { navigator.clipboard.writeText(document.getElementById('usdtAddressTxt').innerText); alert("TRC20 Wallet Address copied successfully!"); };
         window.calculateCryptoConversion = function() { const amtUsdt = parseFloat(document.getElementById('inputUsdtAmount').value) || 0; document.getElementById('calcTotalInr').innerText = (amtUsdt * window.globalUsdtRate).toFixed(2); document.getElementById('calcBonusUsdt').innerText = ((amtUsdt * window.globalUsdtRate) * window.globalBonusRatio / 100).toFixed(2); };
