@@ -18,7 +18,6 @@
 </head>
 <body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
 
-    <!-- FAST CHANNELS LOADER OVERLAY -->
     <div id="fastPaymentProgressLoader" class="fixed inset-0 bg-black/60 z-[10000] flex flex-col justify-center items-center hidden select-none">
         <div class="bg-white p-6 rounded-2xl flex flex-col items-center space-y-4 shadow-2xl max-w-xs text-center">
             <div class="loader-spin"></div>
@@ -177,7 +176,6 @@
         </div>
     </div>
 
-    <!-- REPLACED MODULE BLOCK TO PRESERVE DUAL-MODE LOGICS FOR DIRECT AUTOMATION -->
     <script type="module">
         // UNIFIED PRODUCTION CENTRAL ROUTING CONFIGURATION
         const API_BASE_URL = "http://localhost:3600"; // Production Live Domain URL can replace this placeholder
@@ -326,71 +324,37 @@
             document.getElementById('modalSelectUpi').classList.remove('hidden');
         };
 
-        // 3. UNIFIED BUSINESS ENGINE DISPATCH: AUTOMATIC DIVINE ROUTE VS MANUAL CHANNELS
+        // 3. VERCEL SERVERLESS FUNCTION INTEGRATION
         window.executeDirectModeGatewayRouting = async function() {
             window.closeModalWindow('modalSelectUpi');
-            
-            // Activate dynamic loader overlay system component graphics
             document.getElementById('fastPaymentProgressLoader').classList.remove('hidden');
 
             try {
-                const sessionUserToken = localStorage.getItem('userToken') || 'MOCK_TOKEN_SECRET';
-
-                // Hit unified endpoint built inside back-end master systems routes
-                const response = await fetch(`${API_BASE_URL}/api/task/purchase`, {
+                // Direct Vercel ke Serverless API ko call kar rahe hain
+                const response = await fetch(`/api/create-order`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${sessionUserToken}`
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ taskId: window.selectedTaskDatabaseId })
+                    body: JSON.stringify({ 
+                        amount: window.selectedTaskAmountValuePool, 
+                        userId: window.activeScopeSessionUserIdentityUid // Firebase wala user id
+                    })
                 });
 
                 const result = await response.json();
                 document.getElementById('fastPaymentProgressLoader').classList.add('hidden');
 
-                // ----------------------------------------------------
-                // MODE A: MASTER SWITCH ON -> REDIRECT TO DIVINE PAY LINK
-                // ----------------------------------------------------
-                if (result.success && result.mode === 'automatic' && result.payment_url) {
-                    console.log("[AUTOMATION LIVE] Redirecting client interface layer to live Divine Pay gateway.");
-                    window.location.href = result.payment_url; // Opens checkout instantly
-                    return;
+                if (result.success && result.payment_url) {
+                    console.log("Redirecting to Divine Pay Gateway...");
+                    window.location.href = result.payment_url; 
+                } else {
+                    alert(result.message || "Gateway connection failed.");
                 }
-
-                // ----------------------------------------------------
-                // MODE B: MASTER SWITCH OFF -> RENDER MANUAL COGNITIVE OVERLAY
-                // ----------------------------------------------------
-                if (result.success && result.mode === 'manual') {
-                    console.log("[FALLBACK ACTION] Divine Pay offline. Injecting manual configuration details.");
-                    const details = result.gatewayDetails;
-                    
-                    document.getElementById('lblBankCard').innerText = details.accountNumber || '0772101017541';
-                    document.getElementById('lblBankName').innerText = details.bankName || 'Canara Bank';
-                    document.getElementById('lblBankIfsc').innerText = details.ifscCode || 'CNRB0000772';
-                    document.getElementById('lblBankPayee').innerText = details.payeeName || 'Almas';
-                    document.getElementById('lblBankRemark').innerText = 'NEXA_TASK_REMARK';
-
-                    document.getElementById('lblMetaPaymentChannel').innerText = details.upiId || 'AdminManualUPI';
-                    document.getElementById('lblBankMoney').innerText = window.selectedTaskAmountValuePool + " RS";
-
-                    document.getElementById('txtUserInrUtr').value = '';
-                    document.getElementById('fieldInrScreenshotField').value = '';
-                    document.getElementById('imgInrPreviewElement').classList.add('hidden');
-                    document.getElementById('boxImgPreviewPlaceholder').classList.remove('hidden');
-                    window.temporaryScreenshotBase64Payload = '';
-
-                    window.initializeFiveMinutesCountdownClockTimer();
-                    document.getElementById('modalTaskDetail').classList.remove('hidden');
-                    return;
-                }
-
-                alert(result.message || "Unable to trace endpoint parameters flow settings configuration mapping errors.");
-
             } catch (err) {
                 document.getElementById('fastPaymentProgressLoader').classList.add('hidden');
-                alert("Backend connectivity connection timeout layout array tracking dropped.");
-                console.error("handshake crash exception caught:", err.message);
+                alert("Server timeout. Please try again.");
+                console.error("Crash error:", err.message);
             }
         };
 
