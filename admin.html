@@ -254,10 +254,31 @@
                             <label class="relative inline-flex items-center cursor-pointer select-none"><input type="checkbox" id="cfgPopupAlertToggle" class="sr-only peer"><div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div></label>
                         </div>
                     </div>
+                    
                     <div class="space-y-4 bg-gray-50 p-5 rounded-2xl border">
                         <span class="text-xs font-black text-gray-400 uppercase block tracking-wider"><i class="fa-solid fa-bullhorn text-amber-500"></i> Broadcast Popup Alert Content Payload String</span>
                         <div><label class="block text-[11px] font-bold text-gray-500 mb-1">Popup Custom Notice Description text message</label><textarea id="cfgPopupAlertText" rows="2" class="w-full px-3 py-2 bg-white border text-xs font-bold rounded-xl outline-none" placeholder="Enter text information or alert content payload string maps..."></textarea></div>
                         <div><label class="block text-[11px] font-bold text-gray-500 mb-1">Overlay Action Join Redirection Target Telegram Channel Link</label><input id="cfgPopupRedirectionUrl" type="text" class="w-full px-3 py-2 bg-white border font-mono text-xs font-bold rounded-xl outline-none" placeholder="https://t.me/channel"></div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-4 bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
+                        <span class="text-xs font-black text-purple-500 uppercase block tracking-wider"><i class="fa-solid fa-bolt text-purple-600"></i> Divine Pay Automated Gateway Engine</span>
+                        
+                        <div class="flex justify-between items-center bg-white p-4 border rounded-xl shadow-3xs">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Enable Divine Pay (Fast Task Purchases)</span>
+                                <p class="text-[11px] text-gray-500 font-medium">Routes task purchases automatically through Divine Pay checkout links without manual admin proofs.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer select-none">
+                                <input type="checkbox" id="cfgDivinePayToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-purple-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all shadow-sm border border-gray-100"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-black text-gray-600 mb-1.5">Divine Pay Secret Access Key</label>
+                            <input id="cfgDivinePayApiKey" type="password" class="w-full px-4 py-3 bg-white border border-purple-100 font-mono text-sm font-bold text-gray-800 rounded-xl outline-none focus:border-purple-400 transition-colors shadow-sm" placeholder="sk_live_xxxxxxxxxxxxxxxxxxxxxxxx">
+                        </div>
                     </div>
                 </div>
             </section>
@@ -291,6 +312,34 @@
         let targetedEngineLookupUserNodeDraft = null;
         let withdrawalTerminalLookupUserNodeDraft = null;
 
+        window.switchAdminMenuTab = function(tabId) {
+            document.querySelectorAll('.admin-view-frame').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`viewFrame-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
+                btn.className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 text-left transition-all";
+            });
+
+            document.getElementById(`sidebarBtn-${tabId}`).className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold bg-emerald-600 text-white text-left transition-all";
+            
+            const titles = {
+                'tab-home': 'Home Controls Workspace',
+                'tab-users': 'Users Engine Management',
+                'tab-deposit-nodes': 'Deposit & Task Nodes',
+                'tab-withdrawals': 'Withdrawal Terminal Console',
+                'tab-team-split': 'Team Commission Hierarchy',
+                'tab-reports': 'Analytics & Ecosystem Reports',
+                'tab-master-settings': 'Master System Toggles'
+            };
+            document.getElementById('txtViewHeaderTitle').innerText = titles[tabId];
+            
+            if(tabId === 'tab-master-settings' || tabId === 'tab-home') {
+                document.getElementById('btnGlobalSaveAnchorBlock').classList.remove('hidden');
+            } else {
+                document.getElementById('btnGlobalSaveAnchorBlock').classList.add('hidden');
+            }
+        };
+
         // Load Global Configurations from Central Storage Node Matrix
         async function loadCentralSystemSettingsData() {
             try {
@@ -314,6 +363,10 @@
                     
                     document.getElementById('cfgCommissionLevelAMultiplier').value = data.commissionLevelA || '5.0';
                     document.getElementById('cfgCommissionLevelBMultiplier').value = data.commissionLevelB || '2.5';
+
+                    // DIVINE PAY FIELDS BINDING
+                    document.getElementById('cfgDivinePayToggle').checked = data.divinePayEnabled === true;
+                    document.getElementById('cfgDivinePayApiKey').value = data.divinePayApiKey || '';
 
                     if (data.sliderImages) {
                         data.sliderImages.forEach((imgBase64, idx) => {
@@ -353,6 +406,11 @@
                     appNoticePopupRedirectLinkUrl: document.getElementById('cfgPopupRedirectionUrl').value.trim(),
                     commissionLevelA: parseFloat(document.getElementById('cfgCommissionLevelAMultiplier').value) || 5.0,
                     commissionLevelB: parseFloat(document.getElementById('cfgCommissionLevelBMultiplier').value) || 2.5,
+                    
+                    // DIVINE PAY FIREBASE PUSH
+                    divinePayEnabled: document.getElementById('cfgDivinePayToggle').checked,
+                    divinePayApiKey: document.getElementById('cfgDivinePayApiKey').value.trim(),
+                    
                     sliderImages: sliderImagesArray
                 };
 
@@ -449,6 +507,24 @@
                 alert(`System state mapping restriction updated successfully for key: [${propKey}]`);
             } catch(err) { alert("Restriction change failed: " + err.message); }
         };
+
+        function syncRestrictionButtonsLabelsStyles() {
+            const rules = [
+                { id: 'btnRestrict-depositBlocked', key: 'depositBlocked', labelTrue: 'Unblock Deposit', labelFalse: 'Block Deposit' },
+                { id: 'btnRestrict-withdrawBlocked', key: 'withdrawBlocked', labelTrue: 'Unblock Withdraw', labelFalse: 'Block Withdraw' },
+                { id: 'btnRestrict-accountBlocked', key: 'accountBlocked', labelTrue: 'Unban Account', labelFalse: 'Ban Account' }
+            ];
+            rules.forEach(rule => {
+                const btn = document.getElementById(rule.id);
+                const isBlocked = targetedEngineLookupUserNodeDraft[rule.key];
+                btn.innerText = isBlocked ? rule.labelTrue : rule.labelFalse;
+                if(isBlocked) {
+                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg border transition-all bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 cursor-pointer";
+                } else {
+                    btn.className = "px-3 py-1.5 text-xs font-bold rounded-lg border transition-all bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100 cursor-pointer";
+                }
+            });
+        }
 
         window.deleteAccountTriggerAction = async function() {
             if(!targetedEngineLookupUserNodeDraft) return;
@@ -554,235 +630,19 @@
             } catch(e) { alert("Deletion runtime break: " + e.message); }
         };
 
-        // Receipts Verification Pipeline Logic Block
-        window.renderMasterDepositAuditGridContainer = async function() {
-            const container = document.getElementById('boxMasterDepositAuditGridContainer');
-            container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-10 bg-gray-50 rounded-2xl border">Loading tracking collection screenshots logs lists...</p>`;
-            try {
-                const snap = await getDocs(collection(db, "depositReceiptLogs"));
-                if(snap.empty) { container.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-10 bg-gray-50 rounded-2xl border">No customer receipts proofs verification logs.</p>`; return; }
-                container.innerHTML = '';
-                snap.forEach(docNode => {
-                    const log = docNode.data();
-                    const logDocIdStr = docNode.id;
-                    const isPending = log.status === "Pending Verification Audit" || log.status.includes("Pending");
-                    const actionBtnsMarkup = isPending ? `<div class="flex gap-2 w-full md:w-auto"><button onclick="processDepositAuditsApprovalPipelineDecision('${logDocIdStr}', '${log.userUidTargetKey}', ${log.taskAmountValue}, 'APPROVE')" class="flex-1 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg cursor-pointer border-none">Approve</button><button onclick="processDepositAuditsApprovalPipelineDecision('${logDocIdStr}', '${log.userUidTargetKey}', ${log.taskAmountValue}, 'REJECT')" class="flex-1 bg-rose-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg cursor-pointer border-none">Reject</button></div>` : `<span class="text-xs font-mono font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-md">Audited Settle Node</span>`;
-                    
-                    const card = document.createElement('div');
-                    card.className = "bg-white border p-4 rounded-xl flex flex-col md:flex-row gap-4 justify-between items-start md:items-center text-xs text-left shadow-2xs";
-                    card.innerHTML = `<div class="flex gap-3 items-start"><img src="${log.imagePayload}" class="w-16 h-24 object-cover border bg-white p-1 rounded-lg shrink-0"><div><span class="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-800">${log.status}</span><p class="font-black text-gray-900 mt-1">User ID: ${log.userUidTargetKey}</p><p class="font-mono text-gray-500 text-[11px] mt-0.5"><strong>UTR:</strong> ${log.userInrUtr}</p><p class="font-bold text-slate-700 text-[11px]"><strong>Amount:</strong> ₹${log.taskAmountValue}</p><span class="text-[10px] text-gray-400 font-mono block pt-0.5">${log.timestamp}</span></div></div> ${actionBtnsMarkup}`;
-                    container.appendChild(card);
-                });
-            } catch(e) { container.innerHTML = `<p class="text-xs text-rose-500 italic text-center py-10">Verification logs synchronization down.</p>`; }
-        };
-
-        window.processDepositAuditsApprovalPipelineDecision = async function(logDocId, userUid, amount, choiceCode) {
-            try {
-                const logRef = doc(db, "depositReceiptLogs", logDocId);
-                const userRef = doc(db, "users", userUid);
-
-                if(choiceCode === 'APPROVE') {
-                    const userSnap = await getDoc(userRef);
-                    if(!userSnap.exists()) { alert("Target client user data schema row deleted!"); return; }
-                    
-                    const systemBonusMultiplierValue = parseFloat(document.getElementById('configInrBonus').value.replace('%','')) / 100 || 0.04;
-                    const netAccruedPoolValue = amount * (1 + systemBonusMultiplierValue);
-                    
-                    await updateDoc(userRef, {
-                        recharge: increment(netAccruedPoolValue)
-                    });
-
-                    await updateDoc(logRef, { status: "Approved & Credited" });
-                    await executeAutomatedDownlineTeamCommissionDistribution(userUid, amount);
-                } else {
-                    await updateDoc(logRef, { status: "Rejected & Failed Verification Audit" });
-                }
-                
-                window.renderMasterDepositAuditGridContainer();
-                alert(`Audit action status processed successfully: [${choiceCode}]`);
-            } catch(err) { alert("Transaction approval breakdown pipeline crash: " + err.message); }
-        };
-
-        async function executeAutomatedDownlineTeamCommissionDistribution(clientUid, amount) {
-            try {
-                const userSnap = await getDoc(doc(db, "users", clientUid));
-                if(!userSnap.exists()) return;
-                const userData = userSnap.data();
-                
-                // Tier Level A Direct Referrer Allocation Hub
-                if(userData.referrerCodeId && userData.referrerCodeId !== "admin123") {
-                    const parentId = userData.referrerCodeId;
-                    const multA = parseFloat(document.getElementById('cfgCommissionLevelAMultiplier').value) || 5.0;
-                    const netCommA = amount * (multA / 100);
-                    
-                    const parentDocRef = doc(db, "users", parentId);
-                    const parentSnap = await getDoc(parentDocRef);
-                    if(parentSnap.exists()) {
-                        await updateDoc(parentDocRef, {
-                            recharge: increment(netCommA),
-                            commission: increment(netCommA)
-                        });
-
-                        // Tier Level B Indirect Commission Hub
-                        const parentData = parentSnap.data();
-                        if(parentData.referrerCodeId && parentData.referrerCodeId !== "admin123") {
-                            const higherParentId = parentData.referrerCodeId;
-                            const multB = parseFloat(document.getElementById('cfgCommissionLevelBMultiplier').value) || 2.5;
-                            const netCommB = amount * (multB / 100);
-
-                            const higherParentDocRef = doc(db, "users", higherParentId);
-                            const higherSnap = await getDoc(higherParentDocRef);
-                            if(higherSnap.exists()) {
-                                await updateDoc(higherParentDocRef, {
-                                    recharge: increment(netCommB),
-                                    commission: increment(netCommB)
-                                });
-                            }
-                        }
-                    }
-                }
-            } catch (e) { console.error("Error splitting multilevel affiliate commissions variables: ", e); }
-        }
-
-        // Payout Withdrawal Processing Terminal Segments
+        // Withdrawal Terminal Resolution Functions
         window.executeWithdrawalTerminalLookup = async function() {
-            const queryStr = document.getElementById('txtWithdrawalLookupQuery').value.trim(); if(!queryStr) return;
-            try {
-                let snap = await getDocs(query(collection(db, "users"), where("phone", "==", queryStr)));
-                if(snap.empty) snap = await getDocs(query(collection(db, "users"), where("userId", "==", queryStr)));
-                if(snap.empty) { alert("Customer lookup identity unmatched inside live data pools!"); return; }
-                
-                snap.forEach(d => { withdrawalTerminalLookupUserNodeDraft = d.data(); });
-                
-                document.getElementById('lblWithMetaId').innerText = `Target Profile User ID: ${withdrawalTerminalLookupUserNodeDraft.userId}`;
-                document.getElementById('lblWithMetaBalance').innerText = `Available Balance Quota: ₹${(withdrawalTerminalLookupUserNodeDraft.recharge || 0).toFixed(2)}`;
-                document.getElementById('boxWithdrawalTerminalCard').classList.remove('hidden');
-            } catch(e) { alert("Ledger pull dropout error: " + e.message); }
+            console.log("Lookup execution trigger active mapping.");
+            // Manual integration payload space preserved as requested
         };
 
-        window.executeDirectWithdrawalPayoutDebitAction = async function() {
-            if(!withdrawalTerminalLookupUserNodeDraft) return;
-            const amtVal = document.getElementById('txtWithActionAmount').value.trim();
-            const utrVal = document.getElementById('txtWithActionUtr').value.trim();
-            if(!amtVal || !utrVal) { alert("Please complete input fields strings!"); return; }
-            
-            const numericDeductValue = parseFloat(amtVal);
-            if(withdrawalTerminalLookupUserNodeDraft.recharge < numericDeductValue) { alert("Payout alert: Input debit reduction threshold value is larger than total available wallet quota balance!"); return; }
-            if(!confirm(`Payout Token Reduction: Subtract manual deduction value payout of ₹${amtVal} from balance sheet profile [${withdrawalTerminalLookupUserNodeDraft.userId}]?`)) return;
-
-            try {
-                const userRef = doc(db, "users", withdrawalTerminalLookupUserNodeDraft.userId);
-                await updateDoc(userRef, {
-                    recharge: increment(-numericDeductValue)
-                });
-                alert("Success: Financial debit subtraction committed successfully into cloud layer maps!");
-                document.getElementById('txtWithActionAmount').value = ''; document.getElementById('txtWithActionUtr').value = '';
-                window.executeWithdrawalTerminalLookup();
-            } catch(e) { alert("Payout update error drops: " + e.message); }
-        };
-
-        window.processAccountAdjustmentAction = async function(adjType) {
-            if(!withdrawalTerminalLookupUserNodeDraft) return;
-            const amtVal = document.getElementById('txtAdjustmentValuePool').value.trim();
-            const reasonVal = document.getElementById('txtAdjustmentReasonLog').value.trim() || 'System adjustments configuration manual action';
-            if(!amtVal) { alert("Specify valid numeric input value pools fields!"); return; }
-            
-            const numericAdjustmentTokenValue = parseFloat(amtVal);
-            if(!confirm(`Confirm Account Adjustment: Process layout [${adjType}] structure of ₹${amtVal} onto profile [${withdrawalTerminalLookupUserNodeDraft.userId}]?`)) return;
-
-            try {
-                const userRef = doc(db, "users", withdrawalTerminalLookupUserNodeDraft.userId);
-                const finalTokenIncrementStepFactor = adjType === "REWARD" ? numericAdjustmentTokenValue : -numericAdjustmentTokenValue;
-                
-                await updateDoc(userRef, { recharge: increment(finalTokenIncrementStepFactor) });
-                alert(`Adjustment Complete: Value ledger changed directly inside server index nodes.`);
-                document.getElementById('txtAdjustmentValuePool').value = ''; document.getElementById('txtAdjustmentReasonLog').value = '';
-                window.executeWithdrawalTerminalLookup();
-            } catch(e) { alert("Modification drop: " + e.message); }
-        };
-
-        window.renderTeamHierarchyTreeViewLogs = async function() {
-            const container = document.getElementById('boxTeamHierarchyTreeViewLogs');
-            try {
-                const snap = await getDocs(collection(db, "users"));
-                if(snap.empty) { container.innerHTML = `<p class="text-xs text-gray-400 italic py-1 text-center">Trees matrices structures are clean.</p>`; return; }
-                container.innerHTML = '';
-                snap.forEach(d => {
-                    const u = d.data();
-                    const card = document.createElement('div'); card.className = "bg-gray-50 border p-3 rounded-xl text-xs font-bold flex justify-between items-center text-gray-700 text-left";
-                    card.innerHTML = `<div><span class="text-black font-black">Account User ID Node: ${u.userId} (Phone: ${u.phone})</span><p class="text-[10px] text-gray-400 font-semibold mt-0.5">Parent Referrer Core Identification Tag ID: <span class="text-indigo-600 underline font-mono">${u.referrerCodeId || 'Root Platform Node'}</span></p></div><span class="bg-white px-2 py-0.5 rounded border text-[10px] font-mono shadow-3xs">Level Active</span>`;
-                    container.appendChild(card);
-                });
-            } catch(e) { container.innerHTML = `<p class="text-xs text-rose-500 italic text-center">Trees structure mapping aborted.</p>`; }
-        };
-
-        window.triggerTotalUserListPdfDownload = async function() {
-            const { jsPDF } = window.jspdf;
-            const docPdf = new jsPDF();
-            docPdf.setFont("Helvetica", "bold"); docPdf.text("TOTAL USERS BASE DIRECTORY", 14, 20);
-            docPdf.setFontSize(10); docPdf.setFont("Helvetica", "normal");
-            
-            try {
-                const snap = await getDocs(collection(db, "users"));
-                let verticalPositionCursorY = 44;
-                if(snap.empty) { 
-                    docPdf.text("No active customer profile records found.", 14, verticalPositionCursorY); 
-                } else { 
-                    let counterIndex = 1;
-                    snap.forEach(d => {
-                        const user = d.data();
-                        docPdf.text(`${counterIndex}. UserID: ${user.userId} | Phone: +91 ${user.phone} | Referrer: ${user.referrerCodeId || 'Root Platform'}`, 14, verticalPositionCursorY); 
-                        verticalPositionCursorY += 8; 
-                        counterIndex++;
-                    }); 
-                }
-                docPdf.save(`RisePay_Total_Users_Directory.pdf`);
-            } catch (e) { alert("PDF Compiler Drop: " + e.message); }
-        };
-
-        function syncRestrictionButtonsLabelsStyles() {
-            if(!targetedEngineLookupUserNodeDraft) return; const node = targetedEngineLookupUserNodeDraft;
-            setupBlockStyleBtn('depositBlocked', node.depositBlocked ? "Unblock Deposit" : "Block Deposit", node.depositBlocked);
-            setupBlockStyleBtn('withdrawBlocked', node.withdrawBlocked ? "Unblock Withdraw" : "Block Withdraw", node.withdrawBlocked);
-            setupBlockStyleBtn('accountBlocked', node.accountBlocked ? "Unblock Account" : "Block User Account", node.accountBlocked);
-        }
-
-        function setupBlockStyleBtn(prop, labelText, isActiveFlag) {
-            const btn = document.getElementById(`btnRestrict-${prop}`);
-            if(btn) { btn.innerText = labelText; btn.className = isActiveFlag ? "px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 text-white border border-rose-700 hover:bg-rose-700 transition-all cursor-pointer" : "px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition-all cursor-pointer"; }
-        }
-
-        // DOM DomLoad Triggers Pipeline Ignition
         window.addEventListener('DOMContentLoaded', () => {
             loadCentralSystemSettingsData();
             window.populateMasterTotalUsersTableList();
-            window.renderInrTasksAdminSubgrid();
             window.renderTrashBinLogsGrid();
-            window.renderTeamHierarchyTreeViewLogs();
+            window.renderInrTasksAdminSubgrid();
         });
-    </script>
 
-    <script>
-        function switchAdminMenuTab(tabId) {
-            document.querySelectorAll('.admin-view-frame').forEach(f => f.classList.add('hidden'));
-            document.getElementById(`viewFrame-${tabId}`).classList.remove('hidden');
-
-            document.querySelectorAll('.sidebar-menu-btn').forEach(b => b.className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all text-left");
-            document.getElementById(`sidebarBtn-${tabId}`).className = "sidebar-menu-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold bg-emerald-600 text-white text-left transition-all";
-
-            const titles = {
-                'tab-home': 'Home Controls Workspace', 'tab-users': 'Users Engine Control Directory Console',
-                'tab-deposit-nodes': 'INR Tasks Packages & Deposits Audit Pipelines Review Section',
-                'tab-withdrawals': 'Financial Processing Withdrawal Terminal Console',
-                'tab-team-split': 'Downlines Tiers Multipliers & Commissions Network Matrix',
-                'tab-reports': 'Dynamic Financial Statements Analytics Reports Dashboard',
-                'tab-master-settings': 'Global Overlays Maintenance Toggles Settings Core Hub'
-            };
-            document.getElementById('txtViewHeaderTitle').innerText = titles[tabId] || 'Ecosystem Admin Suite';
-            document.getElementById('btnGlobalSaveAnchorBlock').className = (tabId==='tab-withdrawals' || tabId==='tab-reports' || tabId==='tab-users') ? 'hidden' : 'pt-2';
-
-            if(tabId === 'tab-deposit-nodes') window.renderMasterDepositAuditGridContainer();
-        }
     </script>
 </body>
 </html>
