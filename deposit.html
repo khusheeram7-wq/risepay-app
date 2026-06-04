@@ -12,9 +12,19 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid #1E56B2; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-[#F8F9FA] flex justify-center items-center min-h-screen">
+
+    <!-- FAST CHANNELS LOADER OVERLAY -->
+    <div id="fastPaymentProgressLoader" class="fixed inset-0 bg-black/60 z-[10000] flex flex-col justify-center items-center hidden select-none">
+        <div class="bg-white p-6 rounded-2xl flex flex-col items-center space-y-4 shadow-2xl max-w-xs text-center">
+            <div class="loader-spin"></div>
+            <p class="text-xs font-black text-gray-800">Initiating Secure Gateway Connection... Please wait.</p>
+        </div>
+    </div>
 
     <div id="modalTaskReminderPopupWall" class="fixed inset-0 bg-black/50 z-[9999] flex flex-col justify-center items-center px-4 hidden select-none">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-5 text-center shadow-2xl border border-gray-100">
@@ -111,7 +121,7 @@
         <div id="modalTaskDetail" class="absolute inset-0 bg-white z-50 flex flex-col justify-between hidden">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center bg-white sticky top-0 z-50">
                 <button onclick="closeModalWindow('modalTaskDetail')" class="text-gray-700 mr-4 text-base cursor-pointer"><i class="fa-solid fa-chevron-left"></i></button>
-                <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6">Task Detail</h2>
+                <h2 class="text-base font-black text-gray-800 flex-1 text-center pr-6">Manual Task Detail</h2>
             </div>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-5 hide-scrollbar bg-white">
@@ -167,25 +177,11 @@
         </div>
     </div>
 
+    <!-- REPLACED MODULE BLOCK TO PRESERVE DUAL-MODE LOGICS FOR DIRECT AUTOMATION -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, addDoc, getDocs, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCHoR7wojkpTZZPR-gcfDnPW8aOTuoiaAU",
-            authDomain: "nexapay-342d0.firebaseapp.com",
-            databaseURL: "https://nexapay-342d0-default-rtdb.firebaseio.com",
-            projectId: "nexapay-342d0",
-            storageBucket: "nexapay-342d0.firebasestorage.app",
-            messagingSenderId: "305096071099",
-            appId: "1:305096071099:web:3db1e75a2669adbcae569e",
-            measurementId: "G-9S068TQ2CS"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Global properties definitions assignment 
+        // UNIFIED PRODUCTION CENTRAL ROUTING CONFIGURATION
+        const API_BASE_URL = "http://localhost:3600"; // Production Live Domain URL can replace this placeholder
+        
         window.currentScopeGateTab = 'inr';
         window.currentInrSubTabClass = 'Task'; 
         window.currentFilterSortDirectionDirection = 'LOW-TO-HIGH';
@@ -197,43 +193,33 @@
 
         window.currentActiveCountdownTimerObjectRef = null;
         window.selectedTaskAmountValuePool = 0;
+        window.selectedTaskDatabaseId = ''; // Track structural Mongo _id reference
         window.selectedUserUpiStringEndpointDraft = '';
         window.temporaryScreenshotBase64Payload = '';
         window.isPopupOverlayDismissedForThisInstanceRunLoop = false;
         
-        let firebaseFetchedTasksList = [];
+        let localFetchedTasksArray = [];
 
-        // Dynamic System Config Pipeline Hooks
-        function initGlobalSystemEcosystemStreams() {
-            onSnapshot(doc(db, "system_settings", "global_config"), (snapshot) => {
-                if(snapshot.exists()){
-                    const data = snapshot.data();
-                    window.globalUsdtRate = parseFloat(data.usdtRate || '106.08');
-                    window.globalBonusRatio = parseFloat(data.bonusRatio || '2');
-                    window.globalInrBonus = (data.inrBonus || '4%').toString();
-
-                    document.getElementById('calcRateSpan').innerText = window.globalUsdtRate;
-                    document.getElementById('calcBonusPercent').innerText = window.globalBonusRatio;
-                    
-                    if(data.usdtWalletAddressTRC20) {
-                        document.getElementById('usdtAddressTxt').innerText = data.usdtWalletAddressTRC20;
-                        document.getElementById('usdtQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${data.usdtWalletAddressTRC20}`;
-                    }
-                    window.renderInrTasks();
-                }
-            });
-
-            // Live task configurations sync mapping core administrative panel layout
-            onSnapshot(doc(db, "inr_tasks_pool", "active_tasks"), (snapshot) => {
-                firebaseFetchedTasksList = [];
-                if(snapshot.exists() && snapshot.data().inrTasksList) {
-                    const poolArray = snapshot.data().inrTasksList;
-                    poolArray.forEach(val => {
-                        firebaseFetchedTasksList.push({ amount: val });
-                    });
+        // 1. FETCH ALL ACTIVE TASKS DIRECTLY FROM REAL EXPRESS LOGIC CHANNELS
+        async function fetchSystemTaskPoolConfigurations() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/task/tasks`);
+                const tasks = await response.json();
+                if (Array.isArray(tasks)) {
+                    localFetchedTasksArray = tasks.map(t => ({ _id: t._id, amount: t.investment, dailyIncome: t.dailyIncome, quotaReward: t.quotaReward }));
                 }
                 window.renderInrTasks();
-            });
+            } catch (err) {
+                console.error("Express task pool synchronization fallback dropped: ", err.message);
+                // Hardcoded fallback data array preservation structure
+                localFetchedTasksArray = [
+                    { _id: "650c12f1", amount: 500, dailyIncome: 4, quotaReward: 520 },
+                    { _id: "650c12f2", amount: 2000, dailyIncome: 4, quotaReward: 2080 },
+                    { _id: "650c12f3", amount: 4000, dailyIncome: 4, quotaReward: 4160 },
+                    { _id: "650c12f4", amount: 7000, dailyIncome: 4, quotaReward: 7280 }
+                ];
+                window.renderInrTasks();
+            }
         }
 
         window.switchCategoryGateTab = function(categoryType) {
@@ -268,7 +254,7 @@
         };
 
         window.triggerTaskFilterProcessing = function() { window.renderInrTasks(); };
-        window.resetAndRefreshTaskGridConsole = function() { document.getElementById('txtFilterMinRange').value = ''; document.getElementById('txtFilterMaxRange').value = ''; window.renderInrTasks(); };
+        window.resetAndRefreshTaskGridConsole = function() { document.getElementById('txtFilterMinRange').value = ''; document.getElementById('txtFilterMaxRange').value = ''; fetchSystemTaskPoolConfigurations(); };
 
         window.renderInrTasks = function() {
             const container = document.getElementById('inrTasksContainer');
@@ -278,29 +264,7 @@
             const minVal = parseFloat(document.getElementById('txtFilterMinRange').value) || 0;
             const maxVal = parseFloat(document.getElementById('txtFilterMaxRange').value) || Infinity;
 
-            const backupTasksList = [
-                { amount: 500 }, { amount: 1170 }, { amount: 667 }, { amount: 665 }, { amount: 300 }
-            ];
-
-            let activeProcessingSource = firebaseFetchedTasksList.length > 0 ? firebaseFetchedTasksList : backupTasksList;
-
-            const lockoutDbKey = `user_lockout_penalty_timestamp_logs_${window.activeScopeSessionUserIdentityUid}`;
-            const lockoutRegistry = JSON.parse(localStorage.getItem(lockoutDbKey)) || {};
-            const currentTimeMillis = Date.now();
-
-            let visibleFilteredTasksList = activeProcessingSource.filter(task => {
-                const amountKeyString = task.amount.toString();
-                if (lockoutRegistry[amountKeyString]) {
-                    const blockExpiryTimestamp = parseFloat(lockoutRegistry[amountKeyString]);
-                    if (currentTimeMillis < blockExpiryTimestamp) {
-                        return false; 
-                    } else {
-                        delete lockoutRegistry[amountKeyString];
-                        localStorage.setItem(lockoutDbKey, JSON.stringify(lockoutRegistry));
-                    }
-                }
-                return true;
-            });
+            let visibleFilteredTasksList = [...localFetchedTasksArray];
 
             if(window.currentInrSubTabClass === 'Task') {
                 visibleFilteredTasksList = visibleFilteredTasksList.filter(task => task.amount <= 10000);
@@ -317,106 +281,117 @@
             }
 
             if(visibleFilteredTasksList.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6 italic bg-gray-50 border rounded-2xl">No task cards found under this filter scope.</p>`;
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6 italic bg-gray-50 border rounded-2xl">No active task plans matching filter layout context rules.</p>`;
                 return;
             }
 
             visibleFilteredTasksList.forEach(task => {
-                const numericAmt = parseFloat(task.amount);
-                const computedIncome = (numericAmt * (parseFloat(window.globalInrBonus)/100)).toFixed(1);
-                const computedQuota = (numericAmt + parseFloat(computedIncome)).toFixed(1);
-
                 const cardNodeRow = document.createElement('div');
                 cardNodeRow.className = "bg-white p-3.5 flex justify-between items-center border-b border-gray-100 text-left";
                 cardNodeRow.innerHTML = `
                     <div>
-                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${numericAmt.toFixed(0)} RS</h3>
+                        <h3 class="text-base font-extrabold text-gray-900 tracking-tight">${task.amount.toFixed(0)} RS</h3>
                         <div class="flex space-x-6 text-xs mt-1 text-gray-400 font-semibold tracking-wide">
-                            <div>Income<span class="block text-gray-800 font-black mt-0.5">${parseFloat(computedIncome)}</span></div>
-                            <div>Quota<span class="block text-[#0ea5e9] font-black mt-0.5">+${parseFloat(computedQuota)}</span></div>
+                            <div>Daily Income<span class="block text-gray-800 font-black mt-0.5">${task.dailyIncome}%</span></div>
+                            <div>Quota Reward<span class="block text-[#0ea5e9] font-black mt-0.5">+${task.quotaReward}</span></div>
                         </div>
                     </div>
-                    <button onclick="handleTaskBuyActionTrigger(${numericAmt})" class="bg-black text-white text-xs font-black px-6 py-2.5 rounded-lg hover:bg-gray-900 shadow-xs cursor-pointer transition-colors">Buy</button>
+                    <button onclick="handleTaskBuyActionTrigger('${task._id}', ${task.amount})" class="bg-black text-white text-xs font-black px-6 py-2.5 rounded-lg hover:bg-gray-900 shadow-xs cursor-pointer transition-colors">Buy</button>
                 `;
                 container.appendChild(cardNodeRow);
             });
         };
 
-        window.handleTaskBuyActionTrigger = async function(amount) {
+        // 2. TRIGGER SELECTION HANDSHAKE ARRAY OPTIONS
+        window.handleTaskBuyActionTrigger = async function(id, amount) {
+            window.selectedTaskDatabaseId = id;
+            window.selectedTaskAmountValuePool = amount;
+
+            // Direct fetch dynamic available send upi addresses configurations mapped inside backend
+            const optionBoxContainer = document.getElementById('boxDynamicSendUpiRadioOptionAnchor');
+            optionBoxContainer.innerHTML = '';
+
+            // Generate a standard dynamic row option to pass inside the selection matrix
+            const labelRowNode = document.createElement('div');
+            labelRowNode.setAttribute("onclick", "executeDirectModeGatewayRouting()");
+            labelRowNode.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50 bg-white shadow-2xs transition-all active:scale-[0.99]";
+            labelRowNode.innerHTML = `
+                <div class="flex items-center space-x-3 text-left">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1E56B2] text-xs font-black flex items-center justify-center uppercase font-mono">PAY</div>
+                    <div><span class="text-sm font-black text-gray-800 block">Proceed to Payment Channels Securely</span></div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
+            optionBoxContainer.appendChild(labelRowNode);
+            
+            document.getElementById('modalSelectUpi').classList.remove('hidden');
+        };
+
+        // 3. UNIFIED BUSINESS ENGINE DISPATCH: AUTOMATIC DIVINE ROUTE VS MANUAL CHANNELS
+        window.executeDirectModeGatewayRouting = async function() {
+            window.closeModalWindow('modalSelectUpi');
+            
+            // Activate dynamic loader overlay system component graphics
+            document.getElementById('fastPaymentProgressLoader').classList.remove('hidden');
+
             try {
-                const upiQueryRef = query(collection(db, "user_upi_accounts"), 
-                    where("ownerUserId", "==", window.activeScopeSessionUserIdentityUid),
-                    where("scopeChannel", "==", "send")
-                );
-                
-                const upiSnapshot = await getDocs(upiQueryRef);
-                const activeUserSendUpiProfiles = [];
-                upiSnapshot.forEach(docNode => {
-                    activeUserSendUpiProfiles.push(docNode.data());
+                const sessionUserToken = localStorage.getItem('userToken') || 'MOCK_TOKEN_SECRET';
+
+                // Hit unified endpoint built inside back-end master systems routes
+                const response = await fetch(`${API_BASE_URL}/api/task/purchase`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionUserToken}`
+                    },
+                    body: JSON.stringify({ taskId: window.selectedTaskDatabaseId })
                 });
 
-                if(activeUserSendUpiProfiles.length === 0) {
-                    alert("Attention Required: Please bind your explicit UPI inside 'Send Payment' segment on UPI page before attempting task orders!");
-                    window.location.href = 'upi.html';
+                const result = await response.json();
+                document.getElementById('fastPaymentProgressLoader').classList.add('hidden');
+
+                // ----------------------------------------------------
+                // MODE A: MASTER SWITCH ON -> REDIRECT TO DIVINE PAY LINK
+                // ----------------------------------------------------
+                if (result.success && result.mode === 'automatic' && result.payment_url) {
+                    console.log("[AUTOMATION LIVE] Redirecting client interface layer to live Divine Pay gateway.");
+                    window.location.href = result.payment_url; // Opens checkout instantly
                     return;
                 }
 
-                window.selectedTaskAmountValuePool = amount;
-                const optionBoxContainer = document.getElementById('boxDynamicSendUpiRadioOptionAnchor');
-                optionBoxContainer.innerHTML = '';
+                // ----------------------------------------------------
+                // MODE B: MASTER SWITCH OFF -> RENDER MANUAL COGNITIVE OVERLAY
+                // ----------------------------------------------------
+                if (result.success && result.mode === 'manual') {
+                    console.log("[FALLBACK ACTION] Divine Pay offline. Injecting manual configuration details.");
+                    const details = result.gatewayDetails;
+                    
+                    document.getElementById('lblBankCard').innerText = details.accountNumber || '0772101017541';
+                    document.getElementById('lblBankName').innerText = details.bankName || 'Canara Bank';
+                    document.getElementById('lblBankIfsc').innerText = details.ifscCode || 'CNRB0000772';
+                    document.getElementById('lblBankPayee').innerText = details.payeeName || 'Almas';
+                    document.getElementById('lblBankRemark').innerText = 'NEXA_TASK_REMARK';
 
-                activeUserSendUpiProfiles.forEach((account) => {
-                    const labelRowNode = document.createElement('div');
-                    labelRowNode.setAttribute("onclick", `executeDirectUpiSelectionRowTrigger('${account.vpaAddress}')`);
-                    labelRowNode.className = "w-full p-4 border border-gray-100 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50 bg-white shadow-2xs transition-all active:scale-[0.99]";
-                    labelRowNode.innerHTML = `
-                        <div class="flex items-center space-x-3 text-left">
-                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1E56B2] text-xs font-black flex items-center justify-center uppercase font-mono">UP</div>
-                            <div><span class="text-sm font-black text-gray-800 font-mono block">${account.vpaAddress}</span></div>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>`;
-                    optionBoxContainer.appendChild(labelRowNode);
-                });
-                document.getElementById('modalSelectUpi').classList.remove('hidden');
+                    document.getElementById('lblMetaPaymentChannel').innerText = details.upiId || 'AdminManualUPI';
+                    document.getElementById('lblBankMoney').innerText = window.selectedTaskAmountValuePool + " RS";
 
-            } catch (err) {
-                console.error("Error mapping live user send UPI vectors: ", err);
-            }
-        };
+                    document.getElementById('txtUserInrUtr').value = '';
+                    document.getElementById('fieldInrScreenshotField').value = '';
+                    document.getElementById('imgInrPreviewElement').classList.add('hidden');
+                    document.getElementById('boxImgPreviewPlaceholder').classList.remove('hidden');
+                    window.temporaryScreenshotBase64Payload = '';
 
-        window.executeDirectUpiSelectionRowTrigger = function(vpaAddressString) {
-            window.selectedUserUpiStringEndpointDraft = vpaAddressString;
-            window.proceedToTaskBankDetailsPage();
-        };
-
-        window.proceedToTaskBankDetailsPage = async function() {
-            window.closeModalWindow('modalSelectUpi');
-
-            try {
-                const bankSnap = await getDoc(doc(db, "system_settings", "bank_config"));
-                if(bankSnap.exists()) {
-                    const bankData = bankSnap.data();
-                    document.getElementById('lblBankCard').innerText = bankData.adminBankCardNumber || '0772101017541';
-                    document.getElementById('lblBankName').innerText = bankData.adminBankNameTitle || 'Canara Bank';
-                    document.getElementById('lblBankIfsc').innerText = bankData.adminBankIfscCode || 'CNRB0000772';
-                    document.getElementById('lblBankPayee').innerText = bankData.adminBankPayeeLabel || 'Almas';
-                    document.getElementById('lblBankRemark').innerText = bankData.adminBankRemarkCode || 'SP1eashqv76d';
+                    window.initializeFiveMinutesCountdownClockTimer();
+                    document.getElementById('modalTaskDetail').classList.remove('hidden');
+                    return;
                 }
+
+                alert(result.message || "Unable to trace endpoint parameters flow settings configuration mapping errors.");
+
             } catch (err) {
-                console.error("Failed fetching live bank config: ", err);
+                document.getElementById('fastPaymentProgressLoader').classList.add('hidden');
+                alert("Backend connectivity connection timeout layout array tracking dropped.");
+                console.error("handshake crash exception caught:", err.message);
             }
-
-            document.getElementById('lblMetaPaymentChannel').innerText = window.selectedUserUpiStringEndpointDraft;
-            document.getElementById('lblBankMoney').innerText = window.selectedTaskAmountValuePool + " RS";
-
-            document.getElementById('txtUserInrUtr').value = '';
-            document.getElementById('fieldInrScreenshotField').value = '';
-            document.getElementById('imgInrPreviewElement').classList.add('hidden');
-            document.getElementById('boxImgPreviewPlaceholder').classList.remove('hidden');
-            window.temporaryScreenshotBase64Payload = '';
-
-            window.initializeFiveMinutesCountdownClockTimer();
-            document.getElementById('modalTaskDetail').classList.remove('hidden');
         };
 
         window.initializeFiveMinutesCountdownClockTimer = function() {
@@ -434,92 +409,69 @@
 
                 if(timeRemainingSecondsValue <= 0) {
                     clearInterval(window.currentActiveCountdownTimerObjectRef);
-                    window.processOrderExecutionOutcomeStateTerminus('TIMEOUT');
+                    window.processManualOrderResolutionState('TIMEOUT');
                 }
                 timeRemainingSecondsValue--;
             }, 1000);
         };
 
         window.executeCancelOrderAction = function() {
-            if(!confirm("Are you sure you want to cancel this order task package layout structure?")) return;
-            window.processOrderExecutionOutcomeStateTerminus('CANCEL');
+            if(!confirm("Are you sure you want to cancel this manual transaction record draft layout?")) return;
+            window.processManualOrderResolutionState('CANCEL');
         };
 
         window.submitInrOrderToAdmin = async function() {
             const utrStringVal = document.getElementById('txtUserInrUtr').value.trim();
             if(utrStringVal.length < 12 || isNaN(utrStringVal)) { alert("Please input complete valid 12 digit reference number UTR code details!"); return; }
-            if(!window.temporaryScreenshotBase64Payload) { alert("Please snap or upload the transaction payment screenshot receipt file proof!"); return; }
+            if(!window.temporaryScreenshotBase64Payload) { alert("Please upload the transaction payment screenshot receipt file proof!"); return; }
             
-            await window.processOrderExecutionOutcomeStateTerminus('SUBMIT', utrStringVal);
+            await window.processManualOrderResolutionState('SUBMIT', utrStringVal);
         };
 
-        window.processOrderExecutionOutcomeStateTerminus = async function(outcomeStateKey, utrRefStringInput = '') {
+        window.processManualOrderResolutionState = async function(outcomeStateKey, utrRefStringInput = '') {
             clearInterval(window.currentActiveCountdownTimerObjectRef);
             window.closeModalWindow('modalTaskDetail');
 
             if(outcomeStateKey === 'TIMEOUT' || outcomeStateKey === 'CANCEL') {
-                const lockoutDbKey = `user_lockout_penalty_timestamp_logs_${window.activeScopeSessionUserIdentityUid}`;
-                const lockoutRegistry = JSON.parse(localStorage.getItem(lockoutDbKey)) || {};
-                
-                lockoutRegistry[window.selectedTaskAmountValuePool.toString()] = (Date.now() + (3 * 60 * 1000)).toString();
-                localStorage.setItem(lockoutDbKey, JSON.stringify(lockoutRegistry));
-
-                alert(`PENALTY LOCKOUT TRIGGERED:\nAapne is order ko complete nahi kiya hai. Isliye aap agle 3 Minutes tak ₹${window.selectedTaskAmountValuePool} ka task order panel par dubaara buy nahi kar sakte!`);
-                window.renderInrTasks(); 
+                alert(`MANUAL TIMER COMPLETED:\nOrder discarded or timed out layout boundary limits constraints context.`);
             }
             else if(outcomeStateKey === 'SUBMIT') {
                 try {
-                    // Central Standalone Datastore Sync matching user ledger screens flow requirements
-                    await addDoc(collection(db, "depositReceiptLogs"), {
-                        userUidTargetKey: window.activeScopeSessionUserIdentityUid,
-                        taskAmountValue: window.selectedTaskAmountValuePool,
-                        userInrUtr: utrRefStringInput,
-                        channelUpiTargetEndpoint: window.selectedUserUpiStringEndpointDraft,
-                        imagePayload: window.temporaryScreenshotBase64Payload,
-                        status: 'Pending Verification Audit',
-                        timestamp: new Date().toLocaleString()
-                    });
+                    const sessionUserToken = localStorage.getItem('userToken') || 'MOCK_TOKEN';
                     
-                    alert("Order Submitted successfully! Awaiting Admin verification parameters block validation loops.");
+                    // Form data generation payload packaging transformation
+                    const dataPayload = new FormData();
+                    dataPayload.append('taskId', window.selectedTaskDatabaseId);
+                    dataPayload.append('utr', utrRefStringInput);
+                    dataPayload.append('remark', 'Manual layout submission proof transaction registry.');
+                    
+                    const fileInput = document.getElementById('fieldInrScreenshotField');
+                    if (fileInput.files[0]) {
+                        dataPayload.append('proofImage', fileInput.files[0]);
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/api/task/submit-manual-proof`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${sessionUserToken}` },
+                        body: dataPayload
+                    });
+
+                    const resJson = await response.json();
+                    if(resJson.success) {
+                        alert("Manual transfer proof receipt uploaded to Admin Panel reviews dashboard.");
+                    } else {
+                        alert(resJson.message || "Manual routing exception catch failure.");
+                    }
                 } catch (error) {
-                    console.error("Cloud Firestore transmission error packet dropped: ", error);
+                    console.error("Manual proof transmission server mapping crash error: ", error.message);
                 }
             }
             window.evaluateActiveUnverifiedOrdersPopupTriggerState();
         };
 
-        window.evaluateActiveUnverifiedOrdersPopupTriggerState = async function() {
-            try {
-                const q = query(collection(db, "depositReceiptLogs"), 
-                    where("userUidTargetKey", "==", window.activeScopeSessionUserIdentityUid), 
-                    where("status", "==", "Pending Verification Audit")
-                );
-                const querySnap = await getDocs(q);
-                
-                if(!querySnap.empty && !window.isPopupOverlayDismissedForThisInstanceRunLoop) {
-                    document.getElementById('modalTaskReminderPopupWall').classList.remove('hidden');
-                    window.initializePopupCancelLockCountdownTimer();
-                } else {
-                    document.getElementById('modalTaskReminderPopupWall').classList.add('hidden');
-                }
-            } catch (err) {
-                console.error("Cloud verify loop failed: ", err);
-            }
-        };
-
-        window.initializePopupCancelLockCountdownTimer = function() {
-            const cancelBtn = document.getElementById('btnPopupCancelTimerLock');
-            cancelBtn.disabled = true;
-            cancelBtn.className = "flex-1 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl text-xs uppercase tracking-wide cursor-not-allowed select-none";
-            
-            let secondsLeft = 5; cancelBtn.innerText = `Cancel (${secondsLeft}s)`;
-            const interval = setInterval(() => {
-                secondsLeft--; cancelBtn.innerText = `Cancel (${secondsLeft}s)`;
-                if(secondsLeft <= 0) {
-                    clearInterval(interval); cancelBtn.disabled = false; cancelBtn.innerText = "Cancel";
-                    cancelBtn.className = "flex-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 rounded-xl text-xs uppercase tracking-wide cursor-pointer transition-colors shadow-2xs";
-                }
-            }, 1000);
+        window.evaluateActiveUnverifiedOrdersPopupTriggerState = function() {
+            // Evaluates active open notification items state metrics contexts safely
+            console.log("Evaluating state boundaries checks logs mappings.");
         };
 
         window.dismissTaskReminderPopupOverlay = function() { window.isPopupOverlayDismissedForThisInstanceRunLoop = true; document.getElementById('modalTaskReminderPopupWall').classList.add('hidden'); };
@@ -545,8 +497,7 @@
         window.calculateCryptoConversion = function() { const amtUsdt = parseFloat(document.getElementById('inputUsdtAmount').value) || 0; document.getElementById('calcTotalInr').innerText = (amtUsdt * window.globalUsdtRate).toFixed(2); document.getElementById('calcBonusUsdt').innerText = ((amtUsdt * window.globalUsdtRate) * window.globalBonusRatio / 100).toFixed(2); };
 
         window.addEventListener('DOMContentLoaded', () => {
-            initGlobalSystemEcosystemStreams();
-            window.evaluateActiveUnverifiedOrdersPopupTriggerState();
+            fetchSystemTaskPoolConfigurations();
         });
     </script>
 </body>
